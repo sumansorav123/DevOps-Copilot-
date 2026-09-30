@@ -1,0 +1,357 @@
+{
+  "incidents": {
+    "INC-001": {
+      "id": "INC-001",
+      "title": "Payment Service High Error Rate",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "investigating",
+      "created_at": "2026-09-30T10:15:00",
+      "description": "Payment service is returning a high number of errors.",
+      "type": "HTTP 500 Error Spike",
+      "detected_at": "2026-09-30T10:15:00",
+      "approval": {
+        "status": "not_required",
+        "actor": null,
+        "decided_at": null,
+        "comment": null
+      },
+      "rollback": {
+        "status": "not_started"
+      },
+      "verification": {
+        "status": "not_started"
+      },
+      "evidence": {},
+      "reasoning": [],
+      "timeline": [
+        {
+          "step": "detected",
+          "time": "2026-09-30T10:15:00",
+          "detail": "Payment service is returning a high number of errors."
+        }
+      ]
+    },
+    "INC-002": {
+      "id": "INC-002",
+      "title": "User Service High Memory Usage",
+      "service": "user-service",
+      "severity": "high",
+      "status": "open",
+      "created_at": "2026-09-30T11:30:00",
+      "description": "User service is consuming unusually high memory.",
+      "type": "Memory Usage Spike",
+      "detected_at": "2026-09-30T11:30:00",
+      "approval": {
+        "status": "not_required",
+        "actor": null,
+        "decided_at": null,
+        "comment": null
+      },
+      "rollback": {
+        "status": "not_started"
+      },
+      "verification": {
+        "status": "not_started"
+      },
+      "evidence": {},
+      "reasoning": [],
+      "timeline": [
+        {
+          "step": "detected",
+          "time": "2026-09-30T11:30:00",
+          "detail": "User service is consuming unusually high memory."
+        }
+      ]
+    },
+    "INC-100": {
+      "id": "INC-100",
+      "title": "String HTTP 500 Error Spike",
+      "type": "HTTP 500 Error Spike",
+      "service": "string",
+      "severity": "critical",
+      "status": "detected",
+      "created_at": "2026-09-30T19:58:25.132757+00:00",
+      "detected_at": "2026-09-30T19:58:25.132757+00:00",
+      "description": "string",
+      "investigation_started_at": null,
+      "analyzed_at": null,
+      "root_cause": null,
+      "confidence": null,
+      "reasoning": [],
+      "recommendation": null,
+      "approval": {
+        "status": "pending",
+        "actor": null,
+        "decided_at": null,
+        "comment": null
+      },
+      "rollback": {
+        "status": "not_started",
+        "action": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      "verification": {
+        "status": "not_started",
+        "started_at": null,
+        "completed_at": null,
+        "comparison": {}
+      },
+      "postmortem": null,
+      "evidence": {
+        "logs": [
+          {
+            "incident_id": "INC-100",
+            "timestamp": "2026-09-30T19:53:25.132757+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "HTTP 500 response rate increased"
+          },
+          {
+            "incident_id": "INC-100",
+            "timestamp": "2026-09-30T19:54:25.132757+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "Database connection timeout"
+          },
+          {
+            "incident_id": "INC-100",
+            "timestamp": "2026-09-30T19:55:25.132757+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "Payment request failed"
+          }
+        ],
+        "metrics": {
+          "service": "string",
+          "cpu": 88,
+          "memory": 72,
+          "error_rate": 35.5,
+          "latency_ms": 920
+        },
+        "deployment": {
+          "deployment_id": "DEP-195825",
+          "service": "string",
+          "version": "v1.8.2",
+          "previous_version": "v1.8.1",
+          "deployed_at": "2026-09-30T19:48:25.132757+00:00",
+          "commit": "b72d31e",
+          "status": "success"
+        }
+      },
+      "timeline": [
+        {
+          "step": "detected",
+          "time": "2026-09-30T19:58:25.132911+00:00",
+          "detail": "Simulated incident created by the Incident Simulator."
+        }
+      ],
+      "audit_log": [
+        {
+          "event": "incident_created",
+          "time": "2026-09-30T19:58:25.132915+00:00",
+          "detail": "Scenario: HTTP 500 Error Spike; service: string."
+        },
+        {
+          "event": "classification_completed",
+          "time": "2026-09-30T19:58:25.132922+00:00",
+          "detail": "Backend classified severity as critical."
+        }
+      ]
+    },
+    "INC-101": {
+      "id": "INC-101",
+      "title": "String HTTP 500 Error Spike",
+      "type": "HTTP 500 Error Spike",
+      "service": "string",
+      "severity": "critical",
+      "status": "detected",
+      "created_at": "2026-09-30T19:58:26.632594+00:00",
+      "detected_at": "2026-09-30T19:58:26.632594+00:00",
+      "description": "string",
+      "investigation_started_at": null,
+      "analyzed_at": null,
+      "root_cause": null,
+      "confidence": null,
+      "reasoning": [],
+      "recommendation": null,
+      "approval": {
+        "status": "pending",
+        "actor": null,
+        "decided_at": null,
+        "comment": null
+      },
+      "rollback": {
+        "status": "not_started",
+        "action": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      "verification": {
+        "status": "not_started",
+        "started_at": null,
+        "completed_at": null,
+        "comparison": {}
+      },
+      "postmortem": null,
+      "evidence": {
+        "logs": [
+          {
+            "incident_id": "INC-101",
+            "timestamp": "2026-09-30T19:53:26.632594+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "HTTP 500 response rate increased"
+          },
+          {
+            "incident_id": "INC-101",
+            "timestamp": "2026-09-30T19:54:26.632594+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "Database connection timeout"
+          },
+          {
+            "incident_id": "INC-101",
+            "timestamp": "2026-09-30T19:55:26.632594+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "Payment request failed"
+          }
+        ],
+        "metrics": {
+          "service": "string",
+          "cpu": 88,
+          "memory": 72,
+          "error_rate": 35.5,
+          "latency_ms": 920
+        },
+        "deployment": {
+          "deployment_id": "DEP-195826",
+          "service": "string",
+          "version": "v1.8.2",
+          "previous_version": "v1.8.1",
+          "deployed_at": "2026-09-30T19:48:26.632594+00:00",
+          "commit": "b72d31e",
+          "status": "success"
+        }
+      },
+      "timeline": [
+        {
+          "step": "detected",
+          "time": "2026-09-30T19:58:26.632674+00:00",
+          "detail": "Simulated incident created by the Incident Simulator."
+        }
+      ],
+      "audit_log": [
+        {
+          "event": "incident_created",
+          "time": "2026-09-30T19:58:26.632677+00:00",
+          "detail": "Scenario: HTTP 500 Error Spike; service: string."
+        },
+        {
+          "event": "classification_completed",
+          "time": "2026-09-30T19:58:26.632683+00:00",
+          "detail": "Backend classified severity as critical."
+        }
+      ]
+    },
+    "INC-102": {
+      "id": "INC-102",
+      "title": "String HTTP 500 Error Spike",
+      "type": "HTTP 500 Error Spike",
+      "service": "string",
+      "severity": "critical",
+      "status": "detected",
+      "created_at": "2026-09-30T19:58:29.271637+00:00",
+      "detected_at": "2026-09-30T19:58:29.271637+00:00",
+      "description": "string",
+      "investigation_started_at": null,
+      "analyzed_at": null,
+      "root_cause": null,
+      "confidence": null,
+      "reasoning": [],
+      "recommendation": null,
+      "approval": {
+        "status": "pending",
+        "actor": null,
+        "decided_at": null,
+        "comment": null
+      },
+      "rollback": {
+        "status": "not_started",
+        "action": null,
+        "started_at": null,
+        "completed_at": null
+      },
+      "verification": {
+        "status": "not_started",
+        "started_at": null,
+        "completed_at": null,
+        "comparison": {}
+      },
+      "postmortem": null,
+      "evidence": {
+        "logs": [
+          {
+            "incident_id": "INC-102",
+            "timestamp": "2026-09-30T19:53:29.271637+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "HTTP 500 response rate increased"
+          },
+          {
+            "incident_id": "INC-102",
+            "timestamp": "2026-09-30T19:54:29.271637+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "Database connection timeout"
+          },
+          {
+            "incident_id": "INC-102",
+            "timestamp": "2026-09-30T19:55:29.271637+00:00",
+            "service": "string",
+            "level": "ERROR",
+            "message": "Payment request failed"
+          }
+        ],
+        "metrics": {
+          "service": "string",
+          "cpu": 88,
+          "memory": 72,
+          "error_rate": 35.5,
+          "latency_ms": 920
+        },
+        "deployment": {
+          "deployment_id": "DEP-195829",
+          "service": "string",
+          "version": "v1.8.2",
+          "previous_version": "v1.8.1",
+          "deployed_at": "2026-09-30T19:48:29.271637+00:00",
+          "commit": "b72d31e",
+          "status": "success"
+        }
+      },
+      "timeline": [
+        {
+          "step": "detected",
+          "time": "2026-09-30T19:58:29.271751+00:00",
+          "detail": "Simulated incident created by the Incident Simulator."
+        }
+      ],
+      "audit_log": [
+        {
+          "event": "incident_created",
+          "time": "2026-09-30T19:58:29.271755+00:00",
+          "detail": "Scenario: HTTP 500 Error Spike; service: string."
+        },
+        {
+          "event": "classification_completed",
+          "time": "2026-09-30T19:58:29.271764+00:00",
+          "detail": "Backend classified severity as critical."
+        }
+      ]
+    }
+  },
+  "next_incident_number": 103
+}

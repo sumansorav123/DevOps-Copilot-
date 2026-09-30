@@ -1,0 +1,58 @@
+[
+  {
+    "timestamp": "2026-09-30T09:30:00Z",
+    "service": "payment-service",
+    "cpu": 62,
+    "memory": 68,
+    "error_rate": 2.1,
+    "latency_ms": 410
+  },
+  {
+    "timestamp": "2026-09-30T09:35:00Z",
+    "service": "payment-service",
+    "cpu": 71,
+    "memory": 76,
+    "error_rate": 11.5,
+    "latency_ms": 980
+  },
+  {
+    "timestamp": "2026-09-30T09:40:00Z",
+    "service": "payment-service",
+    "cpu": 78,
+    "memory": 82,
+    "error_rate": 18.7,
+    "latency_ms": 1450
+  },
+  {
+    "timestamp": "2026-09-30T11:10:00Z",
+    "service": "api-gateway",
+    "cpu": 72,
+    "memory": 70,
+    "error_rate": 3.1,
+    "latency_ms": 700
+  },
+  {
+    "timestamp": "2026-09-30T11:20:00Z",
+    "service": "api-gateway",
+    "cpu": 88,
+    "memory": 81,
+    "error_rate": 4.2,
+    "latency_ms": 1320
+  },
+  {
+    "timestamp": "2026-09-29T15:20:00Z",
+    "service": "user-service",
+    "cpu": 65,
+    "memory": 67,
+    "error_rate": 2.2,
+    "latency_ms": 420
+  },
+  {
+    "timestamp": "2026-09-29T15:30:00Z",
+    "service": "user-service",
+    "cpu": 74,
+    "memory": 72,
+    "error_rate": 6.1,
+    "latency_ms": 890
+  }
+]
