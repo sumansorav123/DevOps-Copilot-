@@ -1,0 +1,51 @@
+[
+  {
+    "timestamp": "2026-09-30T09:32:00Z",
+    "level": "INFO",
+    "service": "payment-service",
+    "message": "Deployment version v2.4.0 started.",
+    "incident_id": "INC-001"
+  },
+  {
+    "timestamp": "2026-09-30T09:35:00Z",
+    "level": "ERROR",
+    "service": "payment-service",
+    "message": "DatabaseError: column transaction_reference does not exist",
+    "incident_id": "INC-001"
+  },
+  {
+    "timestamp": "2026-09-30T09:36:00Z",
+    "level": "ERROR",
+    "service": "payment-service",
+    "message": "HTTP 500 returned from POST /payments",
+    "incident_id": "INC-001"
+  },
+  {
+    "timestamp": "2026-09-30T09:37:00Z",
+    "level": "CRITICAL",
+    "service": "payment-service",
+    "message": "Payment transaction processing failed repeatedly",
+    "incident_id": "INC-001"
+  },
+  {
+    "timestamp": "2026-09-30T11:15:00Z",
+    "level": "WARN",
+    "service": "api-gateway",
+    "message": "Upstream response latency exceeded 1000ms",
+    "incident_id": "INC-002"
+  },
+  {
+    "timestamp": "2026-09-30T11:20:00Z",
+    "level": "ERROR",
+    "service": "api-gateway",
+    "message": "Upstream timeout while calling user-service",
+    "incident_id": "INC-002"
+  },
+  {
+    "timestamp": "2026-09-29T15:25:00Z",
+    "level": "ERROR",
+    "service": "user-service",
+    "message": "Database connection timeout",
+    "incident_id": "INC-003"
+  }
+]
