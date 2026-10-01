@@ -1,7 +1,26 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Sidebar() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [backendStatus, setBackendStatus] = useState("checking");
+    const [lastChecked, setLastChecked] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        api.health()
+            .then(() => {
+                if (!active) return;
+                setBackendStatus("healthy");
+                setLastChecked(new Date().toLocaleTimeString());
+            })
+            .catch(() => {
+                if (active) setBackendStatus("unavailable");
+            });
+        return () => { active = false; };
+    }, []);
 
     const navigation = [
         "Overview",
@@ -45,7 +64,8 @@ function Sidebar() {
                         "Audit Log": "/audit-log",
                     };
 
-                    const isActive = item === "Overview";
+                    const isActive = location.pathname === routes[item]
+                        || (item === "Incidents" && location.pathname.startsWith("/incidents/"));
 
                     return (
                         <button
@@ -101,13 +121,13 @@ function Sidebar() {
 
             <div className="mt-auto rounded-lg border border-green-900/40 bg-green-950/30 p-4">
                 <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-green-400" />
-                    <span className="text-xs font-medium text-green-400">
-                        All systems operational
+                    <span className={`h-2 w-2 rounded-full ${backendStatus === "healthy" ? "bg-green-400" : backendStatus === "unavailable" ? "bg-red-400" : "bg-yellow-400"}`} />
+                    <span className={`text-xs font-medium ${backendStatus === "healthy" ? "text-green-400" : backendStatus === "unavailable" ? "text-red-400" : "text-yellow-400"}`}>
+                        {backendStatus === "healthy" ? "Backend operational" : backendStatus === "unavailable" ? "Backend unavailable" : "Checking backend"}
                     </span>
                 </div>
                 <p className="mt-2 text-[10px] text-gray-500">
-                    Last checked 10:32:14
+                    {lastChecked ? `Last checked ${lastChecked}` : "Health check pending"}
                 </p>
             </div>
         </aside>

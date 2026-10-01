@@ -1,9 +1,9 @@
 function IncidentCard({ incident, onClick }) {
   const severityStyles = {
-    Critical: "bg-red-500/10 text-red-400 border-red-500/20",
-    High: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-    Medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    Low: "bg-green-500/10 text-green-400 border-green-500/20",
+    critical: "bg-red-500/10 text-red-400 border-red-500/20",
+    high: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+    low: "bg-green-500/10 text-green-400 border-green-500/20",
   };
 
   return (
@@ -28,7 +28,7 @@ function IncidentCard({ incident, onClick }) {
 
         <span
           className={`rounded-md border px-2.5 py-1 text-xs font-medium ${
-            severityStyles[incident.severity] ||
+            severityStyles[incident.severity?.toLowerCase()] ||
             severityStyles.Medium
           }`}
         >
@@ -45,7 +45,7 @@ function IncidentCard({ incident, onClick }) {
         </span>
 
         <span className="text-xs text-gray-500">
-          {incident.createdAt}
+          {incident.created_at || incident.createdAt || "Unknown"}
         </span>
       </div>
     </div>

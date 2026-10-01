@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from app.services.incident_service import (
     get_incident,
     get_deployments,
+    record_incident_event,
     update_incident,
 )
 
@@ -57,16 +58,28 @@ def rollback_incident(
         )
 
 
+    completed_at = datetime.now(timezone.utc).isoformat()
+    rollback = {
+        "status": "completed",
+        "action": "rollback",
+        "from_version": latest["version"],
+        "to_version": previous,
+        "started_at": completed_at,
+        "completed_at": completed_at,
+    }
     update_incident(
-
         incident_id,
-
         status="remediating",
-
-        updated_at=
-            datetime.now(
-                timezone.utc
-            ).isoformat(),
+        updated_at=completed_at,
+        rollback=rollback,
+        remediation=rollback,
+    )
+    record_incident_event(
+        incident_id,
+        "rollback_completed",
+        f"Simulated rollback from {latest['version']} to {previous}.",
+        "remediation_service",
+        status="verifying",
     )
 
 
@@ -80,6 +93,9 @@ def rollback_incident(
 
         "to_version":
             previous,
+
+        "rollback":
+            rollback,
 
         "message":
             f"Rollback simulated from "

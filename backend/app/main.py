@@ -5,6 +5,9 @@ from app.api import incidents
 from app.api import investigation
 from app.api import remediation
 from app.api import postmortem
+from app.api import verification
+from app.api import deployments
+from app.api import team
 
 
 app = FastAPI(
@@ -40,6 +43,9 @@ app.include_router(incidents.router)
 app.include_router(investigation.router)
 app.include_router(remediation.router)
 app.include_router(postmortem.router)
+app.include_router(verification.router)
+app.include_router(deployments.router)
+app.include_router(team.router)
 
 
 # --------------------------------------------------

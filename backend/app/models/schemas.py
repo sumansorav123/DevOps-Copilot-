@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -19,6 +19,40 @@ class Incident(BaseModel):
     affected_users: int = 0
     error_rate: float = 0.0
     response_time_ms: float = 0.0
+
+
+class SimulateIncidentRequest(BaseModel):
+    scenario: Literal["HTTP 500 Error Spike", "Memory Usage Spike"]
+    service: str
+    description: Optional[str] = None
+    severity: Literal["low", "medium", "high", "critical"] = "critical"
+    recovery_profile: Literal["failure", "success"] = "failure"
+
+
+class IncidentApprovalRequest(BaseModel):
+    decision: str = Field(..., description="approved or rejected")
+    actor: str = "human"
+    comment: Optional[str] = None
+
+
+class TeamMemberCreateRequest(BaseModel):
+    name: str
+    email: str
+    role: Literal["Administrator", "Incident Responder", "Viewer"]
+
+
+class TeamMemberUpdateRequest(BaseModel):
+    role: Optional[Literal["Administrator", "Incident Responder", "Viewer"]] = None
+    status: Optional[Literal["Active", "Inactive"]] = None
+
+
+class VerificationResponse(BaseModel):
+    incident: Optional[Dict[str, Any]] = None
+    status: str
+    message: str
+    metrics_before: Optional[Dict[str, Any]] = None
+    metrics_after: Optional[Dict[str, Any]] = None
+    comparison: Dict[str, Any] = Field(default_factory=dict)
 
 
 # --------------------------------------------------
@@ -66,6 +100,7 @@ class Deployment(BaseModel):
 
 class InvestigationRequest(BaseModel):
     incident_id: str
+    analysis_mode: Literal["Evidence Based", "Conservative", "Detailed"] = "Evidence Based"
 
 
 class InvestigationResult(BaseModel):
@@ -84,11 +119,7 @@ class InvestigationResult(BaseModel):
 
 class RemediationRequest(BaseModel):
     incident_id: str
-
-    action: str = Field(
-        ...,
-        description="rollback, restart, scale, or none"
-    )
+    action: Literal["rollback", "restart", "scale"]
 
     approved: bool = False
 

@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createIncident } from "../api/incidents";
+import { goToWorkflow, rememberIncidentId } from "../utils/incidentWorkflow";
+import { getPreferences } from "../utils/appPreferences";
 
 function IncidentSimulator() {
     const navigate = useNavigate();
 
     const [incidentType, setIncidentType] = useState("HTTP 500 Error Spike");
     const [service, setService] = useState("Payment API");
-    const [severity, setSeverity] = useState("Critical");
+    const [severity, setSeverity] = useState(() => {
+        const configured = getPreferences().defaultSeverity;
+        return configured.charAt(0).toUpperCase() + configured.slice(1);
+    });
+    const [recoveryProfile, setRecoveryProfile] = useState("failure");
     const [createdIncident, setCreatedIncident] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -17,12 +23,9 @@ function IncidentSimulator() {
         "Memory Usage Spike",
     ];
 
-    const services = [
-        "Payment API",
-        "User Service",
-        "Order Service",
-        "Authentication Service",
-    ];
+    const services = incidentType === "Memory Usage Spike"
+        ? ["User Service"]
+        : ["Payment API"];
 
     const severities = [
         "Critical",
@@ -38,8 +41,11 @@ function IncidentSimulator() {
             const incident = await createIncident({
                 scenario: incidentType,
                 service,
+                severity: severity.toLowerCase(),
+                recoveryProfile,
             });
 
+            rememberIncidentId(incident.id);
             setCreatedIncident(incident);
         } catch (error) {
             console.error("Failed to create incident:", error);
@@ -51,11 +57,7 @@ function IncidentSimulator() {
     const handleInvestigate = () => {
         if (!createdIncident) return;
 
-        navigate(`/incidents/${createdIncident.id}`, {
-            state: {
-                incident: createdIncident,
-            },
-        });
+        goToWorkflow(navigate, `/incidents/${createdIncident.id}`, createdIncident.id);
     };
 
     return (
@@ -107,7 +109,14 @@ function IncidentSimulator() {
                                     return (
                                         <button
                                             key={type}
-                                            onClick={() => setIncidentType(type)}
+                                            onClick={() => {
+                                                setIncidentType(type);
+                                                if (type === "Memory Usage Spike") {
+                                                    setService("User Service");
+                                                } else if (service === "User Service") {
+                                                    setService("Payment API");
+                                                }
+                                            }}
                                             className={`rounded-lg border p-4 text-left transition ${selected
                                                 ? "border-green-400 bg-green-400/10"
                                                 : "border-[#252b32] bg-[#0e1318] hover:border-gray-500"
@@ -159,6 +168,28 @@ function IncidentSimulator() {
                                     </option>
                                 ))}
                             </select>
+                        </div>
+
+                        {/* Severity */}
+                        <div>
+                            <label className="mb-2 block text-xs font-medium uppercase tracking-wide text-gray-500">
+                                Recovery Outcome
+                            </label>
+                            <div className="flex gap-3">
+                                {["failure", "success"].map((profile) => (
+                                    <button
+                                        key={profile}
+                                        type="button"
+                                        onClick={() => setRecoveryProfile(profile)}
+                                        className={`rounded-lg border px-4 py-2.5 text-sm capitalize ${recoveryProfile === profile ? "border-green-400 bg-green-400/10 text-green-300" : "border-[#252b32] text-gray-400"}`}
+                                    >
+                                        {profile === "failure" ? "Recovery fails" : "Recovery succeeds"}
+                                    </button>
+                                ))}
+                            </div>
+                            <p className="mt-2 text-xs text-gray-500">
+                                Selects an explicit post-remediation fixture; verification uses the configured health thresholds.
+                            </p>
                         </div>
 
                         {/* Severity */}

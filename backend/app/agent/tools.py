@@ -2,9 +2,7 @@ from typing import Any, Dict
 
 from app.services.incident_service import (
     get_incident,
-    get_logs,
-    get_metrics,
-    get_deployments,
+    get_incident_context,
 )
 
 
@@ -22,19 +20,10 @@ def fetch_incident_context(
             f"Incident {incident_id} not found"
         )
 
+    evidence = get_incident_context(incident)
     return {
 
         "incident": incident,
 
-        "logs": get_logs(
-            incident_id
-        ),
-
-        "metrics": get_metrics(
-            incident["service"]
-        ),
-
-        "deployments": get_deployments(
-            incident["service"]
-        ),
+        **evidence,
     }

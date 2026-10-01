@@ -1,42 +1,38 @@
-from datetime import datetime, timezone
+from typing import Any, Dict, Tuple
+
 from app.agent.incident_agent import investigate_incident
-from app.analyzers.deployment_analyzer import correlate_deployment
-from app.services.state_store import add_audit, add_timeline, put_incident
+from app.services.incident_service import (
+    get_incident,
+    record_incident_event,
+    update_incident,
+)
 
 
-def run_investigation(incident):
-    if incident["status"] not in {"detected", "investigating"}:
-        return incident, None
+def run_investigation(
+    incident_or_id: Any,
+    analysis_mode: str = "Evidence Based",
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    incident_id = (
+        incident_or_id.get("id")
+        if isinstance(incident_or_id, dict)
+        else str(incident_or_id)
+    )
+    incident = get_incident(incident_id)
+    if incident is None:
+        raise ValueError(f"Incident {incident_id} not found")
+    if incident.get("recommendation") and incident.get("status") not in {"detected", "investigating"}:
+        return incident, incident["recommendation"]
 
-    incident["status"] = "investigating"
-    incident["investigation_started_at"] = datetime.now(timezone.utc).isoformat()
-    add_timeline(incident, "investigating", "Investigation started using logs, metrics, and deployment evidence.")
-    add_audit(incident, "investigation_started", "Evidence collection started.")
-
-    deployment = incident.get("evidence", {}).get("deployment")
-    if deployment:
-        correlated = correlate_deployment(deployment, incident["detected_at"])
-        if correlated:
-            incident["evidence"]["deployment"] = correlated
-
-    result = investigate_incident(incident)
-    incident.update({
-        "status": "analyzed",
-        "analyzed_at": datetime.now(timezone.utc).isoformat(),
-        "root_cause": result["root_cause"],
-        "confidence": result["confidence"],
-        "reasoning": result["reasoning"],
-        "recommendation": result["recommendation"],
-        "evidence": {
-            "logs": result["logs"],
-            "metrics": result["metrics"],
-            "deployment": result["deployment"],
-        },
-    })
-    incident["approval"] = {"status": "pending", "actor": None, "decided_at": None, "comment": None}
-    add_timeline(incident, "analyzed", "Root cause and remediation recommendation generated from evidence.")
-    add_timeline(incident, "approval_pending", "Human approval is required before remediation.")
-    add_audit(incident, "investigation_completed", f"Root cause confidence: {result['confidence']}.")
-    put_incident(incident)
-    result["incident"] = incident
-    return incident, result
+    result = investigate_incident(incident_id, analysis_mode=analysis_mode)
+    update_incident(
+        incident_id,
+        recommendation=result,
+        status="approval_pending",
+    )
+    record_incident_event(
+        incident_id,
+        "investigation_completed",
+        f"Analysis completed with {result['confidence']:.0%} confidence.",
+        "incident_agent",
+    )
+    return get_incident(incident_id), result

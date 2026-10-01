@@ -1,272 +1,44 @@
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { useIncidentWorkflow } from "../hooks/useIncidentWorkflow";
+import { goToWorkflow } from "../utils/incidentWorkflow";
 
 function Remediation() {
   const navigate = useNavigate();
+  const { incidentId, incident, investigation, loading, error } = useIncidentWorkflow();
 
-  const remediation = {
-    incidentId: "INC-001",
-    title: "High HTTP 500 Error Rate",
-    service: "Payment API",
-    severity: "Critical",
+  if (loading || error || !incident) {
+    return <div className="min-h-screen bg-[#0d1117] text-white"><Sidebar /><main className="p-8"><h1 className="text-3xl font-bold">Remediation</h1><p className="mt-4 text-gray-400">{loading ? "Loading recommendation..." : error || "Incident unavailable."}</p></main></div>;
+  }
 
-    action: {
-      type: "Rollback Deployment",
-      target: "v1.4.2",
-      commit: "a83f91c",
-      reason:
-        "The latest deployment is strongly correlated with the incident. Rolling back to the previous stable version is recommended to restore the Payment API.",
-    },
-
-    impact: {
-      risk: "Low",
-      expectedResult:
-        "HTTP 500 errors should decrease and payment processing should return to normal.",
-      estimatedTime: "2–5 minutes",
-    },
-  };
+  const recommendation = investigation?.recommendations?.join(" ") || "No recommendation was returned.";
+  const recommendedAction = investigation?.recommended_action;
+  const deployment = investigation?.analysis?.deployments?.recent_deployment;
+  const action = recommendedAction?.action;
+  const canProceed = action === "rollback"
+    ? Boolean(deployment?.previous_version)
+    : ["restart", "scale"].includes(action);
 
   return (
-    <div className="min-h-screen bg-[#0d1117] text-white">
-      <div className="flex min-h-screen">
-        <Sidebar />
-
-        <main className="flex-1 p-8">
-          {/* Header */}
-          <div className="mb-8">
-            <button
-              onClick={() => navigate("/root-cause")}
-              className="mb-5 text-sm text-gray-400 transition hover:text-white"
-            >
-              ← Back to Root Cause
-            </button>
-
-            <p className="text-xs font-medium text-gray-500">
-              {remediation.incidentId}
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold tracking-tight">
-              Remediation
-            </h1>
-
-            <p className="mt-2 text-sm text-gray-400">
-              Review the proposed remediation before requesting human approval.
-            </p>
-          </div>
-
-          {/* Incident Summary */}
-          <div className="mb-8 rounded-xl border border-[#252a31] bg-[#171b20] p-6">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500">
-                  Incident
-                </p>
-
-                <h2 className="mt-2 text-xl font-semibold text-white">
-                  {remediation.title}
-                </h2>
-              </div>
-
-              <div className="flex flex-wrap gap-6">
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-gray-500">
-                    Service
-                  </p>
-
-                  <p className="mt-1 text-sm text-gray-200">
-                    {remediation.service}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs uppercase tracking-wider text-gray-500">
-                    Severity
-                  </p>
-
-                  <span className="mt-1 inline-block rounded-md border border-red-500/20 bg-red-500/10 px-2.5 py-1 text-xs font-medium text-red-400">
-                    {remediation.severity}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Proposed Action */}
-          <section className="mb-8">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-white">
-                Proposed Remediation
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-400">
-                The AI agent has prepared the following action based on the
-                root-cause analysis.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-6">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div>
-                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Action
-                  </p>
-
-                  <h3 className="mt-2 text-2xl font-semibold text-white">
-                    {remediation.action.type}
-                  </h3>
-
-                  <p className="mt-2 text-sm text-gray-400">
-                    Restore the previous stable deployment.
-                  </p>
-                </div>
-
-                <span className="w-fit rounded-md border border-yellow-500/20 bg-yellow-500/10 px-3 py-1.5 text-xs font-medium text-yellow-400">
-                  Awaiting Approval
-                </span>
-              </div>
-
-              {/* Deployment Details */}
-              <div className="mt-6 grid gap-4 border-t border-[#252a31] pt-6 md:grid-cols-2">
-                <div className="rounded-lg border border-[#252a31] bg-[#0d1117] p-4">
-                  <p className="text-xs uppercase tracking-wider text-gray-500">
-                    Target Deployment
-                  </p>
-
-                  <p className="mt-2 font-mono text-lg text-gray-200">
-                    {remediation.action.target}
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-[#252a31] bg-[#0d1117] p-4">
-                  <p className="text-xs uppercase tracking-wider text-gray-500">
-                    Commit
-                  </p>
-
-                  <p className="mt-2 font-mono text-lg text-gray-200">
-                    {remediation.action.commit}
-                  </p>
-                </div>
-              </div>
-
-              {/* Reason */}
-              <div className="mt-6 border-t border-[#252a31] pt-6">
-                <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Why this action?
-                </p>
-
-                <p className="mt-3 max-w-4xl text-sm leading-6 text-gray-300">
-                  {remediation.action.reason}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Expected Impact */}
-          <section className="mb-8">
-            <div className="mb-4">
-              <h2 className="text-xl font-semibold text-white">
-                Expected Impact
-              </h2>
-
-              <p className="mt-1 text-sm text-gray-400">
-                Estimated outcome of the proposed remediation.
-              </p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-5">
-                <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Risk Level
-                </p>
-
-                <p className="mt-2 text-lg font-semibold text-green-400">
-                  {remediation.impact.risk}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-5 md:col-span-1">
-                <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Estimated Time
-                </p>
-
-                <p className="mt-2 text-lg font-semibold text-white">
-                  {remediation.impact.estimatedTime}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-5 md:col-span-1">
-                <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Expected Result
-                </p>
-
-                <p className="mt-2 text-sm leading-6 text-gray-300">
-                  {remediation.impact.expectedResult}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Approval CTA */}
-          <section className="border-t border-[#252a31] pt-8">
-            <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-6">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">
-                    Human Approval Required
-                  </h2>
-
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-400">
-                    This action will modify the deployment state. The AI agent
-                    cannot execute the rollback until an authorized user
-                    reviews and approves the remediation.
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => navigate("/approval")}
-                  className="shrink-0 rounded-lg bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-gray-200"
-                >
-                  Review & Approve →
-                </button>
-              </div>
-            </div>
-          </section>
-
-          {/* Workflow */}
-          <div className="mt-8 border-t border-[#252a31] pt-6">
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <span className="text-green-400">
-                ✓ Investigation
-              </span>
-
-              <span className="text-gray-600">→</span>
-
-              <span className="text-green-400">
-                ✓ Root Cause
-              </span>
-
-              <span className="text-gray-600">→</span>
-
-              <span className="text-blue-400">
-                ● Remediation
-              </span>
-
-              <span className="text-gray-600">→</span>
-
-              <span className="text-gray-500">
-                ○ Human Approval
-              </span>
-
-              <span className="text-gray-600">→</span>
-
-              <span className="text-gray-500">
-                ○ Rollback
-              </span>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
+    <div className="min-h-screen bg-[#0d1117] text-white"><div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-8">
+      <button onClick={() => goToWorkflow(navigate, "/root-cause", incidentId)} className="mb-5 text-sm text-gray-400 hover:text-white">← Back to Root Cause</button>
+      <p className="text-xs text-gray-500">{incidentId} · {incident.service}</p>
+      <h1 className="mt-2 text-3xl font-bold">Remediation</h1>
+      <section className="mt-8 rounded-lg border border-[#252a31] bg-[#171b20] p-6">
+        <p className="text-xs uppercase text-gray-500">Recommended Action</p>
+        <p className="mt-3 text-lg">{action?.toUpperCase() || "No action"}</p>
+        <p className="mt-2 text-sm text-gray-300">{recommendation}</p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div><p className="text-xs uppercase text-gray-500">Current Version</p><p className="mt-2 font-mono">{deployment?.version || "Unavailable"}</p></div>
+          <div><p className="text-xs uppercase text-gray-500">Target Version</p><p className="mt-2 font-mono">{action === "rollback" ? deployment?.previous_version || "Unavailable" : "No version change"}</p></div>
+        </div>
+        {deployment?.commit && <p className="mt-4 text-sm text-gray-400">Commit: <span className="font-mono">{deployment.commit}</span></p>}
+        {deployment?.changes?.length > 0 && <p className="mt-5 text-sm text-gray-400">Deployment changes: {deployment.changes.join(", ")}</p>}
+        {!canProceed && <p className="mt-5 text-sm text-yellow-200">The live analysis did not return an executable action for this incident.</p>}
+      </section>
+      {investigation?.recommendations?.length > 0 && <section className="mt-6 rounded-lg border border-[#252a31] bg-[#171b20] p-6"><h2 className="font-semibold">Other Recommendations</h2><ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-300">{investigation.recommendations.map((item) => <li key={item}>{item}</li>)}</ul></section>}
+      <button disabled={!canProceed} onClick={() => goToWorkflow(navigate, "/approval", incidentId)} className="mt-8 rounded-md bg-white px-5 py-3 text-sm font-semibold text-black disabled:cursor-not-allowed disabled:opacity-40">Review & Approve →</button>
+    </main></div></div>
   );
 }
 

@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -17,6 +19,8 @@ from app.services.verification_service import (
 
 from app.services.incident_service import (
     get_incident,
+    get_deployments,
+    record_incident_event,
     update_incident,
 )
 
@@ -48,22 +52,36 @@ def remediate(
     # Human Approval
     # --------------------------------------------------
 
-    if not request.approved:
+    approval_status = incident.get("approval", {}).get("status")
+    if approval_status != "approved":
 
         return {
 
             "success": False,
 
             "status":
-                "approval_required",
+                "approval_rejected"
+                if approval_status == "rejected"
+                else "approval_required",
 
             "message":
-                "Human approval is required "
+                "Remediation was rejected by a human approver."
+                if approval_status == "rejected"
+                else "Human approval is required "
                 "before remediation.",
         }
 
 
     action = request.action.lower()
+    recommended = incident.get("recommendation", {}).get("recommended_action", {})
+    if action != recommended.get("action"):
+        raise HTTPException(
+            status_code=409,
+            detail="Requested remediation does not match the approved recommendation.",
+        )
+
+    if incident.get("remediation", {}).get("status") == "completed":
+        raise HTTPException(status_code=409, detail="Remediation has already completed")
 
 
     try:
@@ -84,13 +102,19 @@ def remediate(
         # --------------------------------------------------
 
         elif action == "restart":
-
-            update_incident(
-
-                request.incident_id,
-
-                status="remediating",
-            )
+            deployments = get_deployments(incident["service"])
+            latest = max(deployments, key=lambda item: item.get("deployed_at", "")) if deployments else {}
+            completed_at = datetime.now(timezone.utc).isoformat()
+            result_state = {
+                "status": "completed",
+                "action": "restart",
+                "from_version": latest.get("version"),
+                "to_version": latest.get("version"),
+                "started_at": completed_at,
+                "completed_at": completed_at,
+            }
+            update_incident(request.incident_id, remediation=result_state, status="verifying")
+            record_incident_event(request.incident_id, "restart_completed", "Simulated service restart completed.", "remediation_service")
 
             result = {
 
@@ -108,13 +132,19 @@ def remediate(
         # --------------------------------------------------
 
         elif action == "scale":
-
-            update_incident(
-
-                request.incident_id,
-
-                status="remediating",
-            )
+            deployments = get_deployments(incident["service"])
+            latest = max(deployments, key=lambda item: item.get("deployed_at", "")) if deployments else {}
+            completed_at = datetime.now(timezone.utc).isoformat()
+            result_state = {
+                "status": "completed",
+                "action": "scale",
+                "from_version": latest.get("version"),
+                "to_version": latest.get("version"),
+                "started_at": completed_at,
+                "completed_at": completed_at,
+            }
+            update_incident(request.incident_id, remediation=result_state, status="verifying")
+            record_incident_event(request.incident_id, "scale_completed", "Simulated service scaling completed.", "remediation_service")
 
             result = {
 
@@ -131,19 +161,6 @@ def remediate(
         # None
         # --------------------------------------------------
 
-        elif action == "none":
-
-            result = {
-
-                "action":
-                    "none",
-
-                "message":
-                    "No remediation "
-                    "action executed.",
-            }
-
-
         else:
 
             raise HTTPException(
@@ -153,7 +170,7 @@ def remediate(
                 detail=(
                     "Unsupported action. "
                     "Use rollback, restart, "
-                    "scale, or none."
+                    "or scale."
                 ),
             )
 
@@ -165,18 +182,7 @@ def remediate(
         verification = verify_incident(
             request.incident_id
         )
-
-
-        update_incident(
-
-            request.incident_id,
-
-            status=(
-                "resolved"
-                if verification["verified"]
-                else "investigating"
-            ),
-        )
+        updated_incident = get_incident(request.incident_id)
 
 
         return {
@@ -186,6 +192,10 @@ def remediate(
             "data": {
 
                 **result,
+
+                "remediation": updated_incident.get("remediation"),
+
+                "incident_status": updated_incident.get("status"),
 
                 "verification":
                     verification,

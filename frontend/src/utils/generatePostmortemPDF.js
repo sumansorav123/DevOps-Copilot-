@@ -66,6 +66,11 @@ export function generatePostmortemPDF(postmortem) {
   paragraph(`Severity: ${postmortem.severity}`);
   paragraph(`Status: ${postmortem.status}`);
 
+  heading("Approval and Remediation");
+  paragraph(`Approval: ${postmortem.approval?.status || "not recorded"}`);
+  paragraph(`Approved by: ${postmortem.approval?.actor || "not recorded"}`);
+  paragraph(postmortem.remediation || "Remediation details unavailable.");
+
   // Timeline
   heading("Incident Timeline");
 
@@ -77,6 +82,23 @@ export function generatePostmortemPDF(postmortem) {
   // Root Cause
   heading("Root Cause");
   paragraph(postmortem.rootCause);
+
+  heading("Evidence");
+  (postmortem.evidence || []).forEach((item) => {
+    paragraph(`${item.source}: ${item.finding}`);
+  });
+
+  heading("Verification");
+  paragraph(`Status: ${postmortem.verification?.status || "not_started"}`);
+  paragraph(postmortem.verification?.message || "Verification has not been run.");
+  if (postmortem.verification?.metrics_after) {
+    const metrics = postmortem.verification.metrics_after;
+    paragraph(`After remediation: error ${metrics.error_rate}%, latency ${metrics.latency_ms} ms, memory ${metrics.memory}%`);
+  }
+  if (postmortem.verification?.metrics_before) {
+    const metrics = postmortem.verification.metrics_before;
+    paragraph(`Before remediation: error ${metrics.error_rate}%, latency ${metrics.latency_ms} ms, memory ${metrics.memory}%`);
+  }
 
   // Remediation
   heading("Remediation");

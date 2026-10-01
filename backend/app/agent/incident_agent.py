@@ -15,10 +15,12 @@ from app.analyzers.metrics_analyzer import (
 from app.analyzers.deployment_analyzer import (
     analyze_deployments
 )
+from app.agent.llm_investigator import investigate_with_openai
 
 
 def investigate_incident(
-    incident_id: str
+    incident_id: str,
+    analysis_mode: str = "Evidence Based",
 ) -> Dict[str, Any]:
 
     context = fetch_incident_context(
@@ -133,6 +135,23 @@ def investigate_incident(
         ])
 
 
+    elif any(
+        anomaly["type"] == "high_memory"
+        for anomaly in metric_result["anomalies"]
+    ):
+
+        root_cause = (
+            "The available metrics show a memory-pressure signal. "
+            "No suspicious deployment was identified, so the cause "
+            "remains a hypothesis rather than a confirmed change regression."
+        )
+        confidence = 0.78
+        recommendations.extend([
+            "Scale the affected service after human approval.",
+            "Verify memory utilization and service health after scaling.",
+        ])
+
+
     elif (
         log_result["error_count"] > 0
         and metric_result["anomalies"]
@@ -243,12 +262,10 @@ def investigate_incident(
                 f'{deployment["version"]}',
 
             "description":
-                ", ".join(
-                    deployment.get(
-                        "changes",
-                        []
-                    )
-                ),
+                "; ".join(filter(None, [
+                    f'Commit {deployment["commit"]}' if deployment.get("commit") else None,
+                    ", ".join(deployment.get("changes", [])),
+                ])),
         })
 
 
@@ -256,8 +273,43 @@ def investigate_incident(
         key=lambda x: x["timestamp"]
     )
 
+    evidence_gaps = []
+    if not context["logs"]:
+        evidence_gaps.append("No application logs are available for this service.")
+    if not context["metrics"]:
+        evidence_gaps.append("No metrics are available for this service.")
+    if not context["deployments"]:
+        evidence_gaps.append("No deployment or commit information is available for this service.")
 
-    return {
+    conflicts = []
+    if log_result["error_count"] > 0 and not metric_result["anomalies"]:
+        conflicts.append("Logs show application errors while metrics remain below configured anomaly thresholds.")
+    if deployment_result["suspicious"] and log_result["error_count"] == 0:
+        conflicts.append("The latest deployment is marked failed/degraded, but no error-level logs were found.")
+    if deployment_result["suspicious"] and not metric_result["anomalies"]:
+        conflicts.append("The latest deployment is marked failed/degraded, but no metric anomalies were found.")
+
+    recommended_action = "none"
+    if any("rollback" in recommendation.lower() for recommendation in recommendations):
+        recommended_action = "rollback"
+    elif any("scale" in recommendation.lower() for recommendation in recommendations):
+        recommended_action = "scale"
+    elif any("restart" in recommendation.lower() for recommendation in recommendations):
+        recommended_action = "restart"
+
+    latest_deployment = deployment_result["recent_deployment"]
+    recommendation = {
+        "action": recommended_action,
+        "from_version": latest_deployment.get("version") if latest_deployment else None,
+        "target_version": latest_deployment.get("previous_version") if latest_deployment else None,
+        "reason": root_cause,
+    }
+
+    if analysis_mode == "Conservative":
+        confidence = min(confidence, 0.6)
+
+
+    result = {
 
         "incident_id":
             incident_id,
@@ -277,6 +329,26 @@ def investigate_incident(
         "recommendations":
             recommendations,
 
+        "recommended_action":
+            recommendation,
+
+        "evidence_gaps":
+            evidence_gaps,
+
+        "conflicts":
+            conflicts,
+
+        "reasoning": [
+            root_cause,
+            *[f"Conflicting evidence: {conflict}" for conflict in conflicts],
+        ],
+
+        "analysis_provider":
+            "rules",
+
+        "analysis_mode":
+            analysis_mode,
+
         "timeline":
             timeline,
 
@@ -292,3 +364,51 @@ def investigate_incident(
                 deployment_result,
         },
     }
+
+    model_result = investigate_with_openai(
+        incident,
+        context,
+        evidence,
+        analysis_mode,
+    )
+    if model_result:
+        result.update(model_result)
+        if analysis_mode == "Conservative":
+            result["confidence"] = min(float(result["confidence"]), 0.6)
+        model_recommendations = result["recommendations"]
+        if any("rollback" in item.lower() for item in model_recommendations):
+            action = "rollback"
+        elif any("scale" in item.lower() for item in model_recommendations):
+            action = "scale"
+        elif any("restart" in item.lower() for item in model_recommendations):
+            action = "restart"
+        else:
+            action = "none"
+        result["recommended_action"] = {
+            **recommendation,
+            "action": action,
+            "reason": result["root_cause"],
+        }
+    else:
+        result["analysis_provider"] = "rules_fallback"
+        result["analysis_notice"] = (
+            "OpenAI analysis is unavailable; deterministic evidence rules were used."
+        )
+
+    if analysis_mode == "Detailed":
+        detailed_reasoning = [
+            f"Reviewed {log_result['total_logs']} logs, {len(context['metrics'])} metric samples, and {deployment_result['deployment_count']} deployments.",
+            *[
+                f"Metric anomaly: {item['type']} at {item['timestamp']} ({item['value']})."
+                for item in metric_result["anomalies"]
+            ],
+        ]
+        deployment = deployment_result["recent_deployment"]
+        if deployment:
+            commit = f" commit {deployment['commit']}" if deployment.get("commit") else ""
+            detailed_reasoning.append(
+                f"Latest deployment: {deployment['version']}{commit}, status {deployment.get('status', 'unknown')}."
+            )
+        result["reasoning"] = detailed_reasoning + result.get("reasoning", [])
+
+    return result
