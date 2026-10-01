@@ -1,0 +1,24 @@
+[
+  {
+    "profile": "memory_spike",
+    "service": "user-service",
+    "logs": [
+      {
+        "timestamp": "2026-10-01T00:00:00Z",
+        "level": "WARN",
+        "service": "user-service",
+        "message": "Memory utilization exceeded the 85% investigation threshold during the simulated incident."
+      }
+    ],
+    "metrics": [
+      {
+        "timestamp": "2026-10-01T00:00:00Z",
+        "service": "user-service",
+        "cpu": 74,
+        "memory": 91,
+        "error_rate": 2.2,
+        "latency_ms": 420
+      }
+    ]
+  }
+]

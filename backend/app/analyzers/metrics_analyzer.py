@@ -2,6 +2,8 @@ from statistics import mean
 
 from typing import Any, Dict, List
 
+MEMORY_USAGE_THRESHOLD = 85
+
 
 def analyze_metrics(
     metrics: List[Dict[str, Any]]
@@ -63,6 +65,13 @@ def analyze_metrics(
                 "type": "high_cpu",
                 "timestamp": point["timestamp"],
                 "value": point["cpu"],
+            })
+
+        if float(point.get("memory", 0)) >= MEMORY_USAGE_THRESHOLD:
+            anomalies.append({
+                "type": "high_memory",
+                "timestamp": point["timestamp"],
+                "value": point["memory"],
             })
 
     return {

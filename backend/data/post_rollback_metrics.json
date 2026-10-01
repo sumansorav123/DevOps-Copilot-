@@ -1,0 +1,52 @@
+[
+  {
+    "service": "payment-service",
+    "version": "v2.3.5",
+    "recovery_profile": "failure",
+    "scenario": "Rollback completed but service remained unhealthy",
+    "metrics": {
+      "cpu": 78,
+      "memory": 82,
+      "error_rate": 18.7,
+      "latency_ms": 1450
+    }
+  },
+  {
+    "service": "payment-service",
+    "version": "v2.3.5",
+    "recovery_profile": "success",
+    "scenario": "Rollback restored the previously observed healthy payment baseline",
+    "metrics": {
+      "cpu": 62,
+      "memory": 68,
+      "error_rate": 2.1,
+      "latency_ms": 410
+    }
+  },
+  {
+      "service": "user-service",
+      "version": "v3.2.1",
+      "action": "scale",
+      "recovery_profile": "failure",
+      "scenario": "Scaling was simulated but the memory spike persisted",
+      "metrics": {
+        "cpu": 74,
+        "memory": 91,
+        "error_rate": 2.2,
+        "latency_ms": 420
+      }
+    },
+    {
+      "service": "user-service",
+      "version": "v3.2.1",
+      "action": "scale",
+      "recovery_profile": "success",
+      "scenario": "Scaling restored memory headroom",
+      "metrics": {
+        "cpu": 62,
+        "memory": 68,
+        "error_rate": 2.2,
+        "latency_ms": 420
+      }
+    }
+]

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import Sidebar from "../components/Sidebar";
 import api from "../services/api";
+import { goToWorkflow, rememberIncidentId } from "../utils/incidentWorkflow";
 
 function IncidentDetails() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ function IncidentDetails() {
         const incidentData =
           data?.incident || data?.data || data;
 
+        rememberIncidentId(id);
         setIncident(incidentData);
       } catch (err) {
         console.error("Failed to load incident:", err);
@@ -44,10 +46,10 @@ function IncidentDetails() {
   }, [id]);
 
   const severityStyles = {
-    Critical: "bg-red-500/10 text-red-400 border-red-500/20",
-    High: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-    Medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    Low: "bg-green-500/10 text-green-400 border-green-500/20",
+    critical: "bg-red-500/10 text-red-400 border-red-500/20",
+    high: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+    medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+    low: "bg-green-500/10 text-green-400 border-green-500/20",
   };
 
   // --------------------------------------------------
@@ -175,7 +177,7 @@ function IncidentDetails() {
               <span
                 className={
                   "rounded-md border px-3 py-1.5 text-xs font-medium " +
-                  (severityStyles[incident.severity] || severityStyles.Medium)
+                  (severityStyles[incident.severity?.toLowerCase()] || severityStyles.medium)
                 }
               >
                 {incident.severity || "Unknown"}
@@ -274,11 +276,7 @@ function IncidentDetails() {
 
               <button
                 onClick={() =>
-                  navigate("/investigation", {
-                    state: {
-                      incident,
-                    },
-                  })
+                  goToWorkflow(navigate, "/investigation", id)
                 }
                 className="shrink-0 rounded-lg bg-green-400 px-5 py-3 text-sm font-semibold text-black transition hover:bg-green-300"
               >

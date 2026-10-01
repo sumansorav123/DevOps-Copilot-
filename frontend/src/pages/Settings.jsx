@@ -1,8 +1,33 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { getPreferences, savePreferences } from "../utils/appPreferences";
+import api from "../services/api";
+
+function PreferenceToggle({ checked, onChange, label }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-label={label}
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`h-6 w-11 rounded-full p-1 transition ${checked ? "bg-green-400" : "bg-gray-600"}`}
+    >
+      <span className={`block h-4 w-4 rounded-full bg-black transition-transform ${checked ? "translate-x-5" : "translate-x-0"}`} />
+    </button>
+  );
+}
 
 function Settings() {
   const navigate = useNavigate();
+  const [settings, setSettings] = useState(getPreferences);
+  const [backendHealth, setBackendHealth] = useState("checking");
+  const updateSetting = (key, value) => setSettings(savePreferences({ [key]: value }));
+
+  useEffect(() => {
+    api.health().then(() => setBackendHealth("healthy")).catch(() => setBackendHealth("unavailable"));
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
@@ -42,13 +67,11 @@ function Settings() {
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-500">
-                    Receive notifications when a new incident is detected.
+                    Notification preference saved in this browser; no delivery channel is configured.
                   </p>
                 </div>
 
-                <div className="h-6 w-11 rounded-full bg-white p-1">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-black" />
-                </div>
+                <PreferenceToggle label="Incident Notifications" checked={settings.incidentNotifications} onChange={(value) => updateSetting("incidentNotifications", value)} />
               </div>
 
               <div className="flex flex-col gap-4 border-b border-[#252a31] p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -58,14 +81,11 @@ function Settings() {
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-500">
-                    Notify authorized users when remediation requires
-                    approval.
+                    Notification preference saved in this browser; no delivery channel is configured.
                   </p>
                 </div>
 
-                <div className="h-6 w-11 rounded-full bg-white p-1">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-black" />
-                </div>
+                <PreferenceToggle label="Approval Notifications" checked={settings.approvalNotifications} onChange={(value) => updateSetting("approvalNotifications", value)} />
               </div>
 
               <div className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
@@ -75,14 +95,10 @@ function Settings() {
                   </h3>
 
                   <p className="mt-1 text-sm text-gray-500">
-                    Record important incident-response actions in the audit
-                    log.
+                    Lifecycle audit events are retained for incident traceability.
                   </p>
                 </div>
-
-                <div className="h-6 w-11 rounded-full bg-white p-1">
-                  <div className="h-4 w-4 translate-x-5 rounded-full bg-black" />
-                </div>
+                <span className="rounded-md border border-green-500/20 bg-green-500/10 px-3 py-1.5 text-xs text-green-300">Required</span>
               </div>
             </div>
           </section>
@@ -110,13 +126,14 @@ function Settings() {
                 </p>
 
                 <select
-                  defaultValue="Medium"
+                  value={settings.defaultSeverity}
+                  onChange={(event) => updateSetting("defaultSeverity", event.target.value)}
                   className="mt-4 w-full rounded-lg border border-[#30363d] bg-[#0d1117] px-4 py-2.5 text-sm text-gray-200 outline-none focus:border-gray-500 sm:w-64"
                 >
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                  <option>Critical</option>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
                 </select>
               </div>
 
@@ -174,7 +191,8 @@ function Settings() {
                 </p>
 
                 <select
-                  defaultValue="Evidence Based"
+                  value={settings.analysisMode}
+                  onChange={(event) => updateSetting("analysisMode", event.target.value)}
                   className="mt-4 w-full rounded-lg border border-[#30363d] bg-[#0d1117] px-4 py-2.5 text-sm text-gray-200 outline-none focus:border-gray-500 sm:w-64"
                 >
                   <option>Evidence Based</option>
@@ -224,31 +242,31 @@ function Settings() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-5">
                 <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Incident Agent
+                  Backend API
                 </p>
 
                 <p className="mt-2 text-sm font-medium text-green-400">
-                  Operational
+                  {backendHealth === "healthy" ? "Healthy" : backendHealth === "unavailable" ? "Unavailable" : "Checking"}
                 </p>
               </div>
 
               <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-5">
                 <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Evidence Collection
+                  Evidence Data
                 </p>
 
                 <p className="mt-2 text-sm font-medium text-green-400">
-                  Operational
+                  JSON fixtures
                 </p>
               </div>
 
               <div className="rounded-xl border border-[#252a31] bg-[#171b20] p-5">
                 <p className="text-xs uppercase tracking-wider text-gray-500">
-                  Remediation Engine
+                  Remediation
                 </p>
 
                 <p className="mt-2 text-sm font-medium text-green-400">
-                  Operational
+                  Simulated actions
                 </p>
               </div>
             </div>

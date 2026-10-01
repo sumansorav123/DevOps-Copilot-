@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import IncidentCard from "../components/IncidentCard";
 import api from "../services/api";
+import { goToWorkflow } from "../utils/incidentWorkflow";
 
 function Incidents() {
     const navigate = useNavigate();
@@ -110,7 +111,11 @@ function Incidents() {
                                         key={incidentId}
                                         incident={incident}
                                         onClick={() =>
-                                            navigate(`/incidents/${incidentId}`)
+                                            goToWorkflow(
+                                                navigate,
+                                                `/incidents/${incidentId}`,
+                                                incidentId,
+                                            )
                                         }
                                     />
                                 );

@@ -3,13 +3,10 @@ from fastapi import (
     HTTPException,
 )
 
-from app.agent.incident_agent import (
-    investigate_incident
-)
-
 from app.models.schemas import (
     InvestigationRequest
 )
+from app.services.investigation_service import run_investigation
 
 
 router = APIRouter(
@@ -25,8 +22,9 @@ def investigate(
 
     try:
 
-        result = investigate_incident(
-            request.incident_id
+        incident, result = run_investigation(
+            request.incident_id,
+            analysis_mode=request.analysis_mode,
         )
 
         return {

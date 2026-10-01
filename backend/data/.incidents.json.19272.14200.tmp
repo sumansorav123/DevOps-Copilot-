@@ -1,0 +1,2870 @@
+[
+  {
+    "id": "INC-001",
+    "title": "Payment API 500 Errors",
+    "service": "payment-service",
+    "severity": "critical",
+    "status": "investigating",
+    "description": "Payment API is returning HTTP 500 errors after a recent deployment.",
+    "created_at": "2026-09-30T09:30:00Z",
+    "updated_at": "2026-09-30T23:59:57.328640+00:00",
+    "affected_users": 1842,
+    "error_rate": 18.7,
+    "response_time_ms": 1450,
+    "recommendation": {
+      "incident_id": "INC-001",
+      "summary": "Payment API is returning HTTP 500 errors after a recent deployment.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    },
+    "approval": {
+      "status": "approved",
+      "actor": "human",
+      "decided_at": "2026-09-30T23:59:53.621051+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:59:57.328640+00:00",
+      "completed_at": "2026-09-30T23:59:57.328640+00:00"
+    },
+    "verification": {
+      "status": "failed",
+      "verified": false,
+      "message": "Service still shows abnormal metrics.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450,
+        "timestamp": "2026-09-30T23:59:57.328640+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 0.0,
+        "latency_delta": 0.0,
+        "status": "degraded"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-001",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "investigating",
+      "title": "Postmortem: Payment API 500 Errors",
+      "summary": "Payment API is returning HTTP 500 errors after a recent deployment.",
+      "impact": "1842 users were affected. Observed error rate was approximately 18.7%. Observed response time was approximately 1450 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "failed",
+        "verified": false,
+        "message": "Service still shows abnormal metrics.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450,
+          "timestamp": "2026-09-30T23:59:57.328640+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "unresolved",
+        "message": "Verification failed; further investigation is required."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    }
+  },
+  {
+    "id": "INC-002",
+    "title": "High API Latency",
+    "service": "api-gateway",
+    "severity": "high",
+    "status": "approval_pending",
+    "description": "API gateway latency increased significantly during peak traffic.",
+    "created_at": "2026-09-30T11:10:00Z",
+    "updated_at": "2026-10-01T00:28:17.803604+00:00",
+    "affected_users": 921,
+    "error_rate": 4.2,
+    "response_time_ms": 1320,
+    "recommendation": {
+      "incident_id": "INC-002",
+      "summary": "API gateway latency increased significantly during peak traffic.",
+      "root_cause": "Application errors coincide with metric anomalies. The evidence suggests a service-level performance failure.",
+      "confidence": 0.72,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "1 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "Upstream timeout while calling user-service",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "1 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T11:20:00Z",
+              "value": 1320
+            }
+          ]
+        }
+      ],
+      "recommendations": [
+        "Inspect the highest-frequency application errors.",
+        "Check resource utilization and dependency health.",
+        "Consider restarting or scaling the affected service."
+      ],
+      "recommended_action": {
+        "action": "restart",
+        "from_version": "v5.1.0",
+        "target_version": "v5.0.4",
+        "reason": "Application errors coincide with metric anomalies. The evidence suggests a service-level performance failure."
+      },
+      "evidence_gaps": [],
+      "conflicts": [],
+      "reasoning": [
+        "Application errors coincide with metric anomalies. The evidence suggests a service-level performance failure."
+      ],
+      "analysis_provider": "rules_fallback",
+      "timeline": [
+        {
+          "timestamp": "2026-09-28T18:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v5.1.0",
+          "description": "Routing configuration update"
+        },
+        {
+          "timestamp": "2026-09-30T11:15:00Z",
+          "type": "log",
+          "title": "WARN",
+          "description": "Upstream response latency exceeded 1000ms"
+        },
+        {
+          "timestamp": "2026-09-30T11:20:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "Upstream timeout while calling user-service"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 2,
+          "error_count": 1,
+          "patterns": [
+            {
+              "message": "Upstream timeout while calling user-service",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T11:20:00Z",
+              "level": "ERROR",
+              "service": "api-gateway",
+              "message": "Upstream timeout while calling user-service",
+              "incident_id": "INC-002"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 80.0,
+          "average_memory": 75.5,
+          "average_error_rate": 3.65,
+          "average_latency_ms": 1010.0,
+          "anomalies": [
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T11:20:00Z",
+              "value": 1320
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-098",
+            "service": "api-gateway",
+            "version": "v5.1.0",
+            "previous_version": "v5.0.4",
+            "commit": "c91a72f",
+            "deployed_at": "2026-09-28T18:00:00Z",
+            "status": "successful",
+            "changes": [
+              "Routing configuration update"
+            ]
+          },
+          "deployment_count": 1,
+          "suspicious": false
+        }
+      },
+      "analysis_notice": "OpenAI analysis is unavailable; deterministic evidence rules were used."
+    },
+    "timeline": [
+      {
+        "timestamp": "2026-10-01T00:28:17.803604+00:00",
+        "type": "investigation_completed",
+        "title": "Investigation Completed",
+        "description": "Analysis completed with 72% confidence."
+      }
+    ],
+    "audit_log": [
+      {
+        "event": "investigation_completed",
+        "actor": "incident_agent",
+        "timestamp": "2026-10-01T00:28:17.803604+00:00",
+        "detail": "Analysis completed with 72% confidence."
+      }
+    ]
+  },
+  {
+    "id": "INC-003",
+    "title": "Database Connection Errors",
+    "service": "user-service",
+    "severity": "medium",
+    "status": "approval_pending",
+    "description": "User service experienced intermittent database connection failures.",
+    "created_at": "2026-09-29T15:20:00Z",
+    "updated_at": "2026-10-01T00:28:32.927405+00:00",
+    "affected_users": 312,
+    "error_rate": 6.1,
+    "response_time_ms": 890,
+    "recommendation": {
+      "incident_id": "INC-003",
+      "summary": "User service experienced intermittent database connection failures.",
+      "root_cause": "Application errors coincide with metric anomalies. The evidence suggests a service-level performance failure.",
+      "confidence": 0.72,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "1 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "Database connection timeout",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "1 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-29T15:30:00Z",
+              "value": 6.1
+            }
+          ]
+        }
+      ],
+      "recommendations": [
+        "Inspect the highest-frequency application errors.",
+        "Check resource utilization and dependency health.",
+        "Consider restarting or scaling the affected service."
+      ],
+      "recommended_action": {
+        "action": "restart",
+        "from_version": "v3.2.1",
+        "target_version": "v3.2.0",
+        "reason": "Application errors coincide with metric anomalies. The evidence suggests a service-level performance failure."
+      },
+      "evidence_gaps": [],
+      "conflicts": [],
+      "reasoning": [
+        "Application errors coincide with metric anomalies. The evidence suggests a service-level performance failure."
+      ],
+      "analysis_provider": "rules_fallback",
+      "timeline": [
+        {
+          "timestamp": "2026-09-29T12:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v3.2.1",
+          "description": "Database connection pool tuning"
+        },
+        {
+          "timestamp": "2026-09-29T15:25:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "Database connection timeout"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 1,
+          "error_count": 1,
+          "patterns": [
+            {
+              "message": "Database connection timeout",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-29T15:25:00Z",
+              "level": "ERROR",
+              "service": "user-service",
+              "message": "Database connection timeout",
+              "incident_id": "INC-003"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 69.5,
+          "average_memory": 69.5,
+          "average_error_rate": 4.15,
+          "average_latency_ms": 655.0,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-29T15:30:00Z",
+              "value": 6.1
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-097",
+            "service": "user-service",
+            "version": "v3.2.1",
+            "previous_version": "v3.2.0",
+            "commit": "e42bc19",
+            "deployed_at": "2026-09-29T12:00:00Z",
+            "status": "successful",
+            "changes": [
+              "Database connection pool tuning"
+            ]
+          },
+          "deployment_count": 1,
+          "suspicious": false
+        }
+      },
+      "analysis_notice": "OpenAI analysis is unavailable; deterministic evidence rules were used."
+    },
+    "timeline": [
+      {
+        "timestamp": "2026-10-01T00:28:32.927405+00:00",
+        "type": "investigation_completed",
+        "title": "Investigation Completed",
+        "description": "Analysis completed with 72% confidence."
+      }
+    ],
+    "audit_log": [
+      {
+        "event": "investigation_completed",
+        "actor": "incident_agent",
+        "timestamp": "2026-10-01T00:28:32.927405+00:00",
+        "detail": "Analysis completed with 72% confidence."
+      }
+    ]
+  },
+  {
+    "id": "INC-4",
+    "title": "Database latency spike",
+    "service": "Payments API",
+    "severity": "critical",
+    "status": "investigating",
+    "description": "Simulated incident for runtime verification",
+    "created_at": "2026-09-30T23:34:54.389397+00:00",
+    "updated_at": "2026-09-30T23:39:35.665106+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "validation-operator",
+      "decided_at": "2026-09-30T23:39:35.649504+00:00",
+      "comment": "Approved for gate validation"
+    },
+    "verification": {
+      "status": "failed",
+      "verified": false,
+      "message": "Service still shows abnormal metrics.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:35:00Z",
+        "service": "payment-service",
+        "cpu": 71,
+        "memory": 76,
+        "error_rate": 11.5,
+        "latency_ms": 980
+      },
+      "metrics_after": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "comparison": {
+        "error_rate_delta": -7.2,
+        "latency_delta": -470.0,
+        "status": "degraded"
+      }
+    }
+  },
+  {
+    "id": "INC-5",
+    "title": "Database latency spike",
+    "service": "Payments API",
+    "severity": "critical",
+    "status": "approved",
+    "description": "Runtime verification scenario",
+    "created_at": "2026-09-30T23:35:04.914041+00:00",
+    "updated_at": "2026-09-30T23:35:04.949969+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "ops-lead",
+      "decided_at": "2026-09-30T23:35:04.949953+00:00",
+      "comment": "Approved for safe rollback"
+    }
+  },
+  {
+    "id": "INC-6",
+    "title": "Database latency spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "status": "investigating",
+    "description": "Runtime verification scenario",
+    "created_at": "2026-09-30T23:35:26.571894+00:00",
+    "updated_at": "2026-09-30T23:35:26.615282+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "ops-lead",
+      "decided_at": "2026-09-30T23:35:26.598946+00:00",
+      "comment": "Approved for safe rollback"
+    }
+  },
+  {
+    "id": "INC-7",
+    "title": "Database latency spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "status": "investigating",
+    "description": "Runtime verification scenario",
+    "created_at": "2026-09-30T23:35:55.492762+00:00",
+    "updated_at": "2026-09-30T23:35:55.535043+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "ops-lead",
+      "decided_at": "2026-09-30T23:35:55.511516+00:00",
+      "comment": "Approved for safe rollback"
+    },
+    "verification": {
+      "status": "failed",
+      "verified": false,
+      "message": "Service still shows abnormal metrics.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:35:00Z",
+        "service": "payment-service",
+        "cpu": 71,
+        "memory": 76,
+        "error_rate": 11.5,
+        "latency_ms": 980
+      },
+      "metrics_after": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "comparison": {
+        "error_rate_delta": -7.2,
+        "latency_delta": -470.0,
+        "status": "degraded"
+      }
+    }
+  },
+  {
+    "id": "INC-8",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "status": "investigating",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:37:48.531554+00:00",
+    "updated_at": "2026-09-30T23:39:35.607242+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "verification": {
+      "status": "failed",
+      "verified": false,
+      "message": "Service still shows abnormal metrics.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:35:00Z",
+        "service": "payment-service",
+        "cpu": 71,
+        "memory": 76,
+        "error_rate": 11.5,
+        "latency_ms": 980
+      },
+      "metrics_after": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "comparison": {
+        "error_rate_delta": -7.2,
+        "latency_delta": -470.0,
+        "status": "degraded"
+      }
+    }
+  },
+  {
+    "id": "INC-9",
+    "title": "Approval gate probe",
+    "service": "payment-service",
+    "severity": "critical",
+    "status": "rejected",
+    "description": "Simulated incident for Approval gate probe on payment-service.",
+    "created_at": "2026-09-30T23:44:31.575138+00:00",
+    "updated_at": "2026-09-30T23:44:31.600765+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "rejected",
+      "actor": "test",
+      "decided_at": "2026-09-30T23:44:31.600750+00:00",
+      "comment": null
+    }
+  },
+  {
+    "id": "INC-10",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "failure",
+    "status": "detected",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:50:46.302295+00:00",
+    "updated_at": "2026-09-30T23:50:46.302295+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "pending",
+      "actor": null,
+      "decided_at": null,
+      "comment": null
+    },
+    "rollback": {
+      "status": "not_started"
+    },
+    "verification": {
+      "status": "not_started"
+    },
+    "postmortem": null
+  },
+  {
+    "id": "INC-11",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "failure",
+    "status": "rejected",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:50:46.332794+00:00",
+    "updated_at": "2026-09-30T23:50:46.356356+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "rejected",
+      "actor": "runtime-validation",
+      "decided_at": "2026-09-30T23:50:46.356345+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "not_started"
+    },
+    "verification": {
+      "status": "not_started"
+    },
+    "postmortem": null
+  },
+  {
+    "id": "INC-12",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "failure",
+    "status": "investigating",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:50:46.381845+00:00",
+    "updated_at": "2026-09-30T23:50:46.437448+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "runtime-validation",
+      "decided_at": "2026-09-30T23:50:46.419348+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:50:46.437448+00:00",
+      "completed_at": "2026-09-30T23:50:46.437448+00:00"
+    },
+    "verification": {
+      "status": "failed",
+      "verified": false,
+      "message": "Service still shows abnormal metrics.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450,
+        "timestamp": "2026-09-30T23:50:46.437448+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 0.0,
+        "latency_delta": 0.0,
+        "status": "degraded"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-12",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "investigating",
+      "title": "Postmortem: HTTP 500 Error Spike",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "impact": "0 users were affected. Observed error rate was approximately 18.7%. Observed response time was approximately 1450 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "failed",
+        "verified": false,
+        "message": "Service still shows abnormal metrics.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450,
+          "timestamp": "2026-09-30T23:50:46.437448+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "unresolved",
+        "message": "Verification failed; further investigation is required."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    },
+    "recommendation": {
+      "incident_id": "INC-12",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    }
+  },
+  {
+    "id": "INC-13",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "success",
+    "status": "resolved",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:50:46.520479+00:00",
+    "updated_at": "2026-09-30T23:50:46.591986+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "runtime-validation",
+      "decided_at": "2026-09-30T23:50:46.564351+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:50:46.591986+00:00",
+      "completed_at": "2026-09-30T23:50:46.591986+00:00"
+    },
+    "verification": {
+      "status": "passed",
+      "verified": true,
+      "message": "Service appears healthy after remediation.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 62,
+        "memory": 68,
+        "error_rate": 2.1,
+        "latency_ms": 410,
+        "timestamp": "2026-09-30T23:50:46.591986+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 16.6,
+        "latency_delta": 1040.0,
+        "status": "recovered"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-13",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "resolved",
+      "title": "Postmortem: HTTP 500 Error Spike",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "impact": "0 users were affected. Observed error rate was approximately 0.0%. Observed response time was approximately 0.0 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "passed",
+        "verified": true,
+        "message": "Service appears healthy after remediation.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 62,
+          "memory": 68,
+          "error_rate": 2.1,
+          "latency_ms": 410,
+          "timestamp": "2026-09-30T23:50:46.591986+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "resolved",
+        "message": "Incident recovery was verified."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    },
+    "recommendation": {
+      "incident_id": "INC-13",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    }
+  },
+  {
+    "id": "INC-14",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "success",
+    "status": "resolved",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:51:03.854789+00:00",
+    "updated_at": "2026-09-30T23:52:15.972787+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "human",
+      "decided_at": "2026-09-30T23:52:08.958211+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:52:15.972787+00:00",
+      "completed_at": "2026-09-30T23:52:15.972787+00:00"
+    },
+    "verification": {
+      "status": "passed",
+      "verified": true,
+      "message": "Service appears healthy after remediation.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 62,
+        "memory": 68,
+        "error_rate": 2.1,
+        "latency_ms": 410,
+        "timestamp": "2026-09-30T23:52:15.972787+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 16.6,
+        "latency_delta": 1040.0,
+        "status": "recovered"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-14",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "resolved",
+      "title": "Postmortem: HTTP 500 Error Spike",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "impact": "0 users were affected. Observed error rate was approximately 0.0%. Observed response time was approximately 0.0 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "passed",
+        "verified": true,
+        "message": "Service appears healthy after remediation.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 62,
+          "memory": 68,
+          "error_rate": 2.1,
+          "latency_ms": 410,
+          "timestamp": "2026-09-30T23:52:15.972787+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "resolved",
+        "message": "Incident recovery was verified."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    },
+    "recommendation": {
+      "incident_id": "INC-14",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    }
+  },
+  {
+    "id": "INC-15",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "success",
+    "status": "resolved",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:54:00.232109+00:00",
+    "updated_at": "2026-09-30T23:54:30.199537+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "human",
+      "decided_at": "2026-09-30T23:54:22.075521+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:54:30.199537+00:00",
+      "completed_at": "2026-09-30T23:54:30.199537+00:00"
+    },
+    "verification": {
+      "status": "passed",
+      "verified": true,
+      "message": "Service appears healthy after remediation.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 62,
+        "memory": 68,
+        "error_rate": 2.1,
+        "latency_ms": 410,
+        "timestamp": "2026-09-30T23:54:30.199537+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 16.6,
+        "latency_delta": 1040.0,
+        "status": "recovered"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-15",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "resolved",
+      "title": "Postmortem: HTTP 500 Error Spike",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "impact": "0 users were affected. Observed error rate was approximately 0.0%. Observed response time was approximately 0.0 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "passed",
+        "verified": true,
+        "message": "Service appears healthy after remediation.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 62,
+          "memory": 68,
+          "error_rate": 2.1,
+          "latency_ms": 410,
+          "timestamp": "2026-09-30T23:54:30.199537+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "resolved",
+        "message": "Incident recovery was verified."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    },
+    "recommendation": {
+      "incident_id": "INC-15",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    }
+  },
+  {
+    "id": "INC-16",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "failure",
+    "status": "detected",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:56:30.082500+00:00",
+    "updated_at": "2026-09-30T23:56:30.082500+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "pending",
+      "actor": null,
+      "decided_at": null,
+      "comment": null
+    },
+    "rollback": {
+      "status": "not_started"
+    },
+    "verification": {
+      "status": "not_started"
+    },
+    "postmortem": null
+  },
+  {
+    "id": "INC-17",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "failure",
+    "status": "rejected",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:56:30.106425+00:00",
+    "updated_at": "2026-09-30T23:56:30.132833+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "rejected",
+      "actor": "final-validation",
+      "decided_at": "2026-09-30T23:56:30.132818+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "not_started"
+    },
+    "verification": {
+      "status": "not_started"
+    },
+    "postmortem": null
+  },
+  {
+    "id": "INC-18",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "failure",
+    "status": "investigating",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:56:30.155660+00:00",
+    "updated_at": "2026-09-30T23:56:30.222076+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "final-validation",
+      "decided_at": "2026-09-30T23:56:30.201646+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:56:30.222076+00:00",
+      "completed_at": "2026-09-30T23:56:30.222076+00:00"
+    },
+    "verification": {
+      "status": "failed",
+      "verified": false,
+      "message": "Service still shows abnormal metrics.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450,
+        "timestamp": "2026-09-30T23:56:30.222076+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 0.0,
+        "latency_delta": 0.0,
+        "status": "degraded"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-18",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "investigating",
+      "title": "Postmortem: HTTP 500 Error Spike",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "impact": "0 users were affected. Observed error rate was approximately 18.7%. Observed response time was approximately 1450 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "failed",
+        "verified": false,
+        "message": "Service still shows abnormal metrics.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450,
+          "timestamp": "2026-09-30T23:56:30.222076+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "unresolved",
+        "message": "Verification failed; further investigation is required."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    },
+    "recommendation": {
+      "incident_id": "INC-18",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    }
+  },
+  {
+    "id": "INC-19",
+    "title": "HTTP 500 Error Spike",
+    "service": "payment-service",
+    "severity": "critical",
+    "recovery_profile": "success",
+    "status": "resolved",
+    "description": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+    "created_at": "2026-09-30T23:56:30.317343+00:00",
+    "updated_at": "2026-09-30T23:56:30.394786+00:00",
+    "affected_users": 0,
+    "error_rate": 0.0,
+    "response_time_ms": 0.0,
+    "approval": {
+      "status": "approved",
+      "actor": "final-validation",
+      "decided_at": "2026-09-30T23:56:30.373212+00:00",
+      "comment": null
+    },
+    "rollback": {
+      "status": "completed",
+      "from_version": "v2.4.0",
+      "to_version": "v2.3.5",
+      "started_at": "2026-09-30T23:56:30.394786+00:00",
+      "completed_at": "2026-09-30T23:56:30.394786+00:00"
+    },
+    "verification": {
+      "status": "passed",
+      "verified": true,
+      "message": "Service appears healthy after remediation.",
+      "metrics_before": {
+        "timestamp": "2026-09-30T09:40:00Z",
+        "service": "payment-service",
+        "cpu": 78,
+        "memory": 82,
+        "error_rate": 18.7,
+        "latency_ms": 1450
+      },
+      "metrics_after": {
+        "cpu": 62,
+        "memory": 68,
+        "error_rate": 2.1,
+        "latency_ms": 410,
+        "timestamp": "2026-09-30T23:56:30.394786+00:00",
+        "service": "payment-service",
+        "version": "v2.3.5"
+      },
+      "comparison": {
+        "error_rate_delta": 16.6,
+        "latency_delta": 1040.0,
+        "status": "recovered"
+      }
+    },
+    "postmortem": {
+      "incident_id": "INC-19",
+      "service": "payment-service",
+      "severity": "critical",
+      "status": "resolved",
+      "title": "Postmortem: HTTP 500 Error Spike",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "impact": "0 users were affected. Observed error rate was approximately 18.7%. Observed response time was approximately 1450 ms.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "verification": {
+        "status": "passed",
+        "verified": true,
+        "message": "Service appears healthy after remediation.",
+        "metrics_before": {
+          "timestamp": "2026-09-30T09:40:00Z",
+          "service": "payment-service",
+          "cpu": 78,
+          "memory": 82,
+          "error_rate": 18.7,
+          "latency_ms": 1450
+        },
+        "metrics_after": {
+          "cpu": 62,
+          "memory": 68,
+          "error_rate": 2.1,
+          "latency_ms": 410,
+          "timestamp": "2026-09-30T23:56:30.394786+00:00",
+          "service": "payment-service",
+          "version": "v2.3.5"
+        }
+      },
+      "resolution": {
+        "status": "resolved",
+        "message": "Incident recovery was verified."
+      },
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "corrective_actions": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "prevention_actions": [
+        "Add deployment health checks.",
+        "Improve application error monitoring.",
+        "Configure alerts for elevated error rates and latency.",
+        "Require approval for production rollback/remediation actions."
+      ]
+    },
+    "recommendation": {
+      "incident_id": "INC-19",
+      "summary": "Simulated incident for HTTP 500 Error Spike on payment-service.",
+      "root_cause": "The incident is strongly associated with the latest deployment. Application errors appeared together with a degraded or failed deployment.",
+      "confidence": 0.88,
+      "evidence": [
+        {
+          "source": "logs",
+          "finding": "3 error/critical log entries detected.",
+          "details": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ]
+        },
+        {
+          "source": "metrics",
+          "finding": "3 metric anomalies detected.",
+          "details": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        {
+          "source": "deployment",
+          "finding": "The latest deployment has a degraded or failed status.",
+          "details": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          }
+        }
+      ],
+      "recommendations": [
+        "Review the latest deployment changes.",
+        "Rollback to the previous stable version after approval.",
+        "Verify error rate and latency after rollback."
+      ],
+      "timeline": [
+        {
+          "timestamp": "2026-09-27T14:00:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.3.5",
+          "description": "Performance improvements"
+        },
+        {
+          "timestamp": "2026-09-30T09:30:00Z",
+          "type": "deployment",
+          "title": "Deployment v2.4.0",
+          "description": "Added transaction reference validation, Updated payment database schema"
+        },
+        {
+          "timestamp": "2026-09-30T09:32:00Z",
+          "type": "log",
+          "title": "INFO",
+          "description": "Deployment version v2.4.0 started."
+        },
+        {
+          "timestamp": "2026-09-30T09:35:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "DatabaseError: column transaction_reference does not exist"
+        },
+        {
+          "timestamp": "2026-09-30T09:36:00Z",
+          "type": "log",
+          "title": "ERROR",
+          "description": "HTTP 500 returned from POST /payments"
+        },
+        {
+          "timestamp": "2026-09-30T09:37:00Z",
+          "type": "log",
+          "title": "CRITICAL",
+          "description": "Payment transaction processing failed repeatedly"
+        }
+      ],
+      "analysis": {
+        "logs": {
+          "total_logs": 4,
+          "error_count": 3,
+          "patterns": [
+            {
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "count": 1
+            },
+            {
+              "message": "HTTP 500 returned from POST /payments",
+              "count": 1
+            },
+            {
+              "message": "Payment transaction processing failed repeatedly",
+              "count": 1
+            }
+          ],
+          "errors": [
+            {
+              "timestamp": "2026-09-30T09:35:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "DatabaseError: column transaction_reference does not exist",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:36:00Z",
+              "level": "ERROR",
+              "service": "payment-service",
+              "message": "HTTP 500 returned from POST /payments",
+              "incident_id": "INC-001"
+            },
+            {
+              "timestamp": "2026-09-30T09:37:00Z",
+              "level": "CRITICAL",
+              "service": "payment-service",
+              "message": "Payment transaction processing failed repeatedly",
+              "incident_id": "INC-001"
+            }
+          ]
+        },
+        "metrics": {
+          "average_cpu": 70.33,
+          "average_memory": 75.33,
+          "average_error_rate": 10.77,
+          "average_latency_ms": 946.67,
+          "anomalies": [
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:35:00Z",
+              "value": 11.5
+            },
+            {
+              "type": "high_error_rate",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 18.7
+            },
+            {
+              "type": "high_latency",
+              "timestamp": "2026-09-30T09:40:00Z",
+              "value": 1450
+            }
+          ]
+        },
+        "deployments": {
+          "recent_deployment": {
+            "id": "DEP-100",
+            "service": "payment-service",
+            "version": "v2.4.0",
+            "previous_version": "v2.3.5",
+            "deployed_at": "2026-09-30T09:30:00Z",
+            "status": "failed",
+            "changes": [
+              "Added transaction reference validation",
+              "Updated payment database schema"
+            ]
+          },
+          "deployment_count": 2,
+          "suspicious": true
+        }
+      }
+    }
+  }
+]

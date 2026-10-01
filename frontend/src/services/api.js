@@ -1,5 +1,7 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000";
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://localhost:8000";
 
 async function request(endpoint, options = {}) {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -55,6 +57,12 @@ export const api = {
   incident: (id) =>
     request(`/api/incidents/${id}`),
 
+  approve: (incidentId, decision, comment = null) =>
+    request(`/api/incidents/${incidentId}/approval`, {
+      method: "POST",
+      body: JSON.stringify({ decision, actor: "human", comment }),
+    }),
+
 
   // ------------------------------------------------
   // Investigation Evidence
@@ -69,17 +77,42 @@ export const api = {
   deployments: (id) =>
     request(`/api/incidents/${id}/deployments`),
 
+  allDeployments: () =>
+    request("/api/deployments"),
+
+  incidentAudit: (id) =>
+    request(`/api/incidents/${id}/audit`),
+
+  teamMembers: () =>
+    request("/api/team-members"),
+
+  addTeamMember: (member) =>
+    request("/api/team-members", {
+      method: "POST",
+      body: JSON.stringify(member),
+    }),
+
+  updateTeamMember: (id, changes) =>
+    request(`/api/team-members/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(changes),
+    }),
+
+  deleteTeamMember: (id) =>
+    request(`/api/team-members/${id}`, { method: "DELETE" }),
+
 
   // ------------------------------------------------
   // AI Investigation
   // ------------------------------------------------
 
-  investigate: (incidentId) =>
+  investigate: (incidentId, analysisMode = "Evidence Based") =>
     request("/api/investigation", {
       method: "POST",
 
       body: JSON.stringify({
         incident_id: incidentId,
+        analysis_mode: analysisMode,
       }),
     }),
 

@@ -12,15 +12,19 @@ import { apiRequest } from "./client";
  *   service: "Payment API"
  * }
  */
-export async function createIncident({ scenario, service, description }) {
-    return apiRequest("/api/incidents/simulate", {
+export async function createIncident({ scenario, service, severity = "critical", description, recoveryProfile = "failure" }) {
+    const payload = await apiRequest("/api/incidents/simulate", {
         method: "POST",
         body: JSON.stringify({
             scenario,
             service,
+            severity,
+            recovery_profile: recoveryProfile,
             ...(description ? { description } : {}),
         }),
     });
+
+    return payload?.data ?? payload;
 }
 
 /**
@@ -30,7 +34,8 @@ export async function createIncident({ scenario, service, description }) {
  * GET /api/incidents/
  */
 export async function getIncidents() {
-    return apiRequest("/api/incidents/");
+    const payload = await apiRequest("/api/incidents/");
+    return payload?.data ?? payload;
 }
 
 /**
@@ -40,7 +45,8 @@ export async function getIncidents() {
  * GET /api/incidents/{incident_id}
  */
 export async function getIncident(incidentId) {
-    return apiRequest(`/api/incidents/${incidentId}`);
+    const payload = await apiRequest(`/api/incidents/${incidentId}`);
+    return payload?.data ?? payload;
 }
 
 /**
@@ -50,7 +56,8 @@ export async function getIncident(incidentId) {
  * GET /api/incidents/{incident_id}/audit
  */
 export async function getIncidentAudit(incidentId) {
-    return apiRequest(`/api/incidents/${incidentId}/audit`);
+    const payload = await apiRequest(`/api/incidents/${incidentId}/audit`);
+    return payload?.data ?? payload;
 }
 
 /**
@@ -63,7 +70,7 @@ export async function submitApproval(
     incidentId,
     { decision, actor = "human", comment = null }
 ) {
-    return apiRequest(`/api/incidents/${incidentId}/approval`, {
+    const payload = await apiRequest(`/api/incidents/${incidentId}/approval`, {
         method: "POST",
         body: JSON.stringify({
             decision,
@@ -71,4 +78,6 @@ export async function submitApproval(
             comment,
         }),
     });
+
+    return payload?.data ?? payload;
 }

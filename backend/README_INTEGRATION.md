@@ -1,155 +1,49 @@
-# EvoOps Copilot Backend — Frontend Integration Contract
+# DevOps Incident Agent Integration
 
-This backend implements the complete hackathon lifecycle:
+The active application uses FastAPI, JSON fixtures, and one persisted incident record for the workflow. Remediation is simulated; no production deployment is changed.
 
-`Incident → Investigation → Root Cause → Recommendation → Human Approval → Rollback → Verification → Postmortem`
+## Run
 
-The backend is the source of truth for incident status, classification, evidence, root cause, recommendation, approval, rollback, verification, and postmortem.
+Use Python 3.13, create/activate a virtual environment, then install and start:
 
-## Start
-
-```bash
+```powershell
 cd backend
-python -m venv venv
-# Windows PowerShell
-.\venv\Scripts\Activate.ps1
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirement.txt
 python run.py
 ```
 
-API base URL: `http://127.0.0.1:8000`
+Backend: `http://localhost:8000`  
+Frontend: `http://localhost:5173`  
+Swagger: `http://localhost:8000/docs`
 
-Swagger: `http://127.0.0.1:8000/docs`
+## Optional OpenAI Analysis
 
-## Endpoints
+Copy `.env.example` to `.env` and set `OPENAI_API_KEY`. `OPENAI_MODEL` defaults to `gpt-4o-mini`. The agent uses OpenAI tool calling for application logs, metrics, and deployment evidence when configured. Without a key or if the model request fails, it uses the deterministic evidence-rule fallback and returns `analysis_provider` plus `analysis_notice`; it does not claim model analysis ran.
 
-### 1. Create/simulate incident
+## API Contract
 
-`POST /api/incidents/simulate`
+All incident IDs come from the response to `POST /api/incidents/simulate` and are used for subsequent requests.
 
-```json
-{
-  "scenario": "HTTP 500 Error Spike",
-  "service": "Payment API"
-}
-```
+- `GET /health` returns backend health.
+- `GET /api/incidents` lists persisted incidents.
+- `GET /api/incidents/dashboard` returns incident counts.
+- `POST /api/incidents/simulate` accepts `scenario`, `service`, `severity`, and `recovery_profile` (`failure` or `success`). `Memory Usage Spike` is supported for `User Service`; payment rollback profiles are supported for `Payment API`.
+- `GET /api/incidents/{id}` returns the incident and lifecycle state.
+- `GET /api/incidents/{id}/logs`, `/metrics`, `/deployments`, and `/audit` return evidence/events for that incident. Generated scenarios can use explicitly marked fixture evidence associated with their new incident ID.
+- `GET /api/deployments` returns the deployment fixture list including commit IDs.
+- `GET /api/team-members`, `POST /api/team-members`, `PATCH /api/team-members/{id}`, and `DELETE /api/team-members/{id}` manage the persisted prototype directory. This is not an authentication or authorization system.
+- `POST /api/investigation` accepts `incident_id` and optional `analysis_mode` (`Evidence Based`, `Conservative`, `Detailed`); it persists the analysis and sets the incident to `approval_pending`.
+- `POST /api/incidents/{id}/approval` accepts `decision` (`approved` or `rejected`), `actor`, and optional `comment`. Decisions are persisted and conflicting repeat decisions are rejected. The actor is currently a submitted label, not an authenticated identity.
+- `POST /api/remediation` accepts `incident_id`, the recommended `action`, and legacy `approved` request data. Authorization comes from the persisted incident approval; the request boolean is not trusted. The requested action must match the persisted recommendation.
+- `GET /api/verification/{id}` returns the persisted verification result. `POST /api/verification` is also available to run verification after a completed remediation.
+- `POST /api/postmortem` accepts `incident_id`, generates an idempotent report from persisted investigation/remediation/verification state, and stores it on the incident.
 
-The frontend should not be the final authority for severity/type. The backend classifies them from the scenario and generated evidence.
+## Recovery Behavior
 
-Response contains the new `incident.id` and `status: detected`.
+Payment rollback samples are selected by service, target version, action, and recovery profile. Existing health thresholds remain `error_rate < 5` and `latency_ms < 1000`. The memory-spike scenario additionally requires memory below the configured 85% anomaly threshold. A failed recovery remains failed; it is not converted to success.
 
-### 2. Get incidents
+The incident record stores approval, recommendation, remediation/rollback, verification, audit/timeline events, and postmortem. JSON data is under `backend/data/`.
 
-`GET /api/incidents/`
-
-### 3. Get one incident
-
-`GET /api/incidents/{incident_id}`
-
-The returned incident contains the complete persisted workflow state.
-
-### 4. Investigate
-
-`POST /api/investigation/`
-
-```json
-{
-  "incident_id": "INC-100"
-}
-```
-
-Returns:
-
-- `incident`
-- `logs`
-- `metrics`
-- `deployment`
-- `deployment_correlation`
-- `root_cause`
-- `confidence`
-- `reasoning`
-- `recommendation`
-- `evidence`
-
-Successful investigation moves the incident to `analyzed` and then `approval_pending` conceptually through the persisted timeline; the persisted status used for the approval gate is `analyzed`.
-
-### 5. Human approval
-
-`POST /api/incidents/{incident_id}/approval`
-
-```json
-{
-  "decision": "approved",
-  "actor": "human",
-  "comment": "Approve simulated rollback"
-}
-```
-
-Allowed decisions: `approved`, `rejected`.
-
-Approval is persisted. Rollback cannot execute unless the persisted decision is `approved`.
-
-### 6. Rollback
-
-`POST /api/remediation/rollback`
-
-```json
-{
-  "incident_id": "INC-100",
-  "action": "Rollback to previous stable version"
-}
-```
-
-Rollback updates the incident through `remediation_running` to `remediated` and records the source/target deployment versions.
-
-### 7. Verification
-
-`POST /api/verification/`
-
-```json
-{
-  "incident_id": "INC-100"
-}
-```
-
-The backend captures pre-rollback metrics, creates a simulated post-rollback health state, compares before/after values, and sets the incident to `resolved` or `failed`.
-
-### 8. Verification state
-
-`GET /api/verification/{incident_id}`
-
-### 9. Postmortem
-
-`POST /api/postmortem/{incident_id}`
-
-No root cause/action/verification fields are supplied by the frontend. The backend generates the postmortem from persisted workflow state.
-
-### 10. Existing postmortem
-
-`GET /api/postmortem/{incident_id}`
-
-### 11. Audit log
-
-`GET /api/incidents/{incident_id}/audit`
-
-## Lifecycle
-
-The persisted status values are:
-
-- `detected`
-- `investigating`
-- `analyzed`
-- `approval_pending` represented by the pending approval state while analysis is complete
-- `approved`
-- `rejected`
-- `remediation_running`
-- `remediated`
-- `verification_running`
-- `resolved`
-- `failed`
-
-The exact approval gate is enforced by the rollback service.
-
-## Important frontend rule
-
-Do not keep the incident/root-cause/rollback/verification values as independent frontend truth. Store the active `incidentId` and refresh the incident from the backend after each workflow action.
+Settings preferences are stored in browser localStorage. Notification toggles are preferences only; no email/push delivery channel is configured. The team directory stores role metadata, but the backend does not authenticate identities or enforce these roles.
