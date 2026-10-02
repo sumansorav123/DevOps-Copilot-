@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import api from "../services/api";
-import { generatePostmortemPDF } from "../utils/generatePostmortemPDF";
 import { getActiveIncidentId, goToWorkflow, unwrapResponse } from "../utils/incidentWorkflow";
 
 function Postmortem() {
@@ -13,14 +12,13 @@ function Postmortem() {
   const [reportError, setReportError] = useState("");
   const [reportGenerated, setReportGenerated] = useState(false);
   const [reportSaved, setReportSaved] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    if (!incidentId) {
-      setReportError("No active incident.");
-      setLoading(false);
-      return undefined;
-    }
+    if (!incidentId) return undefined;
+
     api.postmortem(incidentId)
       .then((response) => {
         if (!cancelled) {
@@ -43,40 +41,53 @@ function Postmortem() {
     setReportSaved(true);
   }
 
-  function downloadReport() {
-    if (!report) return;
-    generatePostmortemPDF({
-      incidentId: report.incident_id,
-      title: report.title,
-      service: report.service,
-      severity: report.severity,
-      status: report.resolution?.status || "not_verified",
-      timeline: (report.timeline || []).map((event) => ({
-        step: event.title || event.type || "Event",
-        time: event.timestamp || "",
-        detail: event.description || "",
-      })),
-      rootCause: report.root_cause || "Unavailable",
-      remediation: [
-        report.remediation?.action,
-        ...(report.remediation?.action === "rollback"
-          ? [
-              report.remediation?.from_version && `from ${report.remediation.from_version}`,
-              report.remediation?.to_version && `to ${report.remediation.to_version}`,
-            ]
-          : [report.remediation?.from_version && `on version ${report.remediation.from_version}`]),
-        ...(report.corrective_actions || []),
-      ].filter(Boolean).join("; ") || "No corrective actions returned.",
-      resolution: report.resolution?.message || "Recovery has not been verified.",
-      lessons: report.prevention_actions || [],
-      verification: report.verification,
-      approval: report.approval,
-      evidence: report.evidence || [],
-    });
+  async function downloadReport() {
+    if (!report || pdfLoading) return;
+
+    setPdfLoading(true);
+    setPdfError("");
+    try {
+      const { generatePostmortemPDF } = await import("../utils/generatePostmortemPDF");
+      generatePostmortemPDF({
+        incidentId: report.incident_id,
+        title: report.title,
+        service: report.service,
+        severity: report.severity,
+        status: report.resolution?.status || "not_verified",
+        timeline: (report.timeline || []).map((event) => ({
+          step: event.title || event.type || "Event",
+          time: event.timestamp || "",
+          detail: event.description || "",
+        })),
+        rootCause: report.root_cause || "Unavailable",
+        remediation: [
+          report.remediation?.action,
+          ...(report.remediation?.action === "rollback"
+            ? [
+                report.remediation?.from_version && `from ${report.remediation.from_version}`,
+                report.remediation?.to_version && `to ${report.remediation.to_version}`,
+              ]
+            : [report.remediation?.from_version && `on version ${report.remediation.from_version}`]),
+          ...(report.corrective_actions || []),
+        ].filter(Boolean).join("; ") || "No corrective actions returned.",
+        resolution: report.resolution?.message || "Recovery has not been verified.",
+        lessons: report.prevention_actions || [],
+        verification: report.verification,
+        approval: report.approval,
+        evidence: report.evidence || [],
+      });
+    } catch (error) {
+      setPdfError(error instanceof Error ? error.message : "PDF could not be generated.");
+    } finally {
+      setPdfLoading(false);
+    }
   }
 
-  if (loading || reportError || !report) {
-    return <div className="min-h-screen bg-[#0d1117] text-white"><Sidebar /><main className="p-8"><h1 className="text-3xl font-bold">Incident Postmortem</h1><p className="mt-4 text-gray-400">{loading ? "Generating postmortem..." : reportError || "No active incident."}</p></main></div>;
+  const isLoading = Boolean(incidentId) && loading;
+  const displayError = incidentId ? reportError : "No active incident.";
+
+  if (isLoading || displayError || !report) {
+    return <div className="min-h-screen bg-[#0d1117] text-white"><Sidebar /><main className="p-8"><h1 className="text-3xl font-bold">Incident Postmortem</h1><p className="mt-4 text-gray-400">{isLoading ? "Generating postmortem..." : displayError || "Postmortem unavailable."}</p></main></div>;
   }
 
   const resolutionStatus = report.resolution?.status || "not_verified";
@@ -107,7 +118,7 @@ function Postmortem() {
       <section className="mt-6 rounded-lg border border-[#252a31] bg-[#171b20] p-6"><h2 className="text-lg font-semibold">Incident Timeline</h2>{report.timeline?.length ? <ol className="mt-4 space-y-4">{report.timeline.map((event, index) => <li key={`${event.timestamp}-${index}`} className="border-l border-[#3b424a] pl-4"><p className="text-xs text-gray-500">{event.timestamp} · {event.type}</p><p className="mt-1 text-sm font-medium">{event.title}</p><p className="mt-1 text-sm text-gray-400">{event.description}</p></li>)}</ol> : <p className="mt-3 text-sm text-gray-400">No timeline events were returned.</p>}</section>
       <section className="mt-6 grid gap-5 md:grid-cols-2"><div className="rounded-lg border border-[#252a31] bg-[#171b20] p-6"><h2 className="font-semibold">Corrective Actions</h2><ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-300">{(report.corrective_actions || []).map((item) => <li key={item}>{item}</li>)}</ul></div><div className="rounded-lg border border-[#252a31] bg-[#171b20] p-6"><h2 className="font-semibold">Prevention Actions</h2><ul className="mt-3 list-disc space-y-2 pl-5 text-sm text-gray-300">{(report.prevention_actions || []).map((item) => <li key={item}>{item}</li>)}</ul></div></section>
 
-      <section className="mt-8 rounded-lg border border-[#252a31] bg-[#171b20] p-6"><h2 className="text-lg font-semibold">Incident Report</h2><p className="mt-2 text-sm text-gray-400">{reportGenerated ? "Export ready." : "Backend postmortem loaded."}</p>{reportSaved && <p className="mt-2 text-sm text-green-300">Saved in this browser.</p>}<div className="mt-5 flex flex-wrap gap-3"><button onClick={() => setReportGenerated(true)} className="rounded-md bg-green-400 px-4 py-2 text-sm font-semibold text-black">Prepare Export</button><button disabled={!reportGenerated} onClick={saveReport} className="rounded-md border border-[#444b53] px-4 py-2 text-sm disabled:opacity-40">Save Report</button><button disabled={!reportGenerated} onClick={downloadReport} className="rounded-md border border-[#444b53] px-4 py-2 text-sm disabled:opacity-40">Download PDF</button></div></section>
+      <section className="mt-8 rounded-lg border border-[#252a31] bg-[#171b20] p-6"><h2 className="text-lg font-semibold">Incident Report</h2><p className="mt-2 text-sm text-gray-400">{reportGenerated ? "Export ready." : "Backend postmortem loaded."}</p>{reportSaved && <p className="mt-2 text-sm text-green-300">Saved in this browser.</p>}{pdfLoading && <p role="status" className="mt-2 text-sm text-gray-300">Preparing PDF download...</p>}{pdfError && <p role="alert" className="mt-2 text-sm text-red-300">{pdfError}</p>}<div className="mt-5 flex flex-wrap gap-3"><button onClick={() => setReportGenerated(true)} className="rounded-md bg-green-400 px-4 py-2 text-sm font-semibold text-black">Prepare Export</button><button disabled={!reportGenerated} onClick={saveReport} className="rounded-md border border-[#444b53] px-4 py-2 text-sm disabled:opacity-40">Save Report</button><button disabled={!reportGenerated || pdfLoading} onClick={downloadReport} className="rounded-md border border-[#444b53] px-4 py-2 text-sm disabled:opacity-40">{pdfLoading ? "Generating PDF..." : "Download PDF"}</button></div></section>
     </main></div></div>
   );
 }

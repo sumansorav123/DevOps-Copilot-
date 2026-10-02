@@ -74,7 +74,7 @@ export function useIncidentWorkflow({ includeEvidence = false, includeInvestigat
     return () => {
       cancelled = true;
     };
-  }, [incidentId, includeEvidence]);
+  }, [incidentId, includeEvidence, includeInvestigation]);
 
   return { incidentId, ...workflow };
 }

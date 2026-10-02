@@ -20,7 +20,6 @@ function Investigation() {
     );
   }
 
-  const analysis = investigation?.analysis || {};
   const serviceFixtureLogs = logs.filter((log) => log.incident_id !== incidentId);
 
   return (

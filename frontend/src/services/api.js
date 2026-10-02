@@ -1,28 +1,48 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  import.meta.env.VITE_API_BASE_URL ||
-  "http://localhost:8000";
+import { API_BASE_URL } from "../api/config";
+
+const inFlightPosts = new Map();
 
 async function request(endpoint, options = {}) {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
+  const url = `${API_BASE_URL}${endpoint}`;
+  const method = (options.method || "GET").toUpperCase();
+  const requestKey = method === "POST"
+    ? `${method}:${url}:${options.body || ""}`
+    : null;
+  const pendingRequest = requestKey && inFlightPosts.get(requestKey);
+  if (pendingRequest) return pendingRequest;
 
-  const data = await response.json().catch(() => ({}));
+  const requestPromise = (async () => {
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
 
-  if (!response.ok) {
-    throw new Error(
-      data.detail ||
-      data.message ||
-      `API request failed (${response.status})`
-    );
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(
+        data.detail ||
+        data.message ||
+        `API request failed (${response.status})`
+      );
+    }
+
+    return data;
+  })();
+
+  if (!requestKey) return requestPromise;
+
+  inFlightPosts.set(requestKey, requestPromise);
+  try {
+    return await requestPromise;
+  } finally {
+    if (inFlightPosts.get(requestKey) === requestPromise) {
+      inFlightPosts.delete(requestKey);
+    }
   }
-
-  return data;
 }
 
 // --------------------------------------------------
